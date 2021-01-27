@@ -1,6 +1,16 @@
 <template>
   <v-container fluid>
-    <p class="font-weight-black">Crear Proyecto.</p>
+    <v-chip
+      class="mb-5"
+      color="secondary"
+      label
+      text-color="white"
+    >
+      Crear Proyecto.
+      <v-icon right>
+        mdi-text-box-plus
+      </v-icon>
+    </v-chip>
     <v-form
       ref="form"
       v-model="validForm"

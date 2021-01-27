@@ -35,10 +35,10 @@
             </v-list-item-content>
           </v-list-item>
 
-          <!-- Formulario Proyecto -->
+          <!-- FORMULARIO DE PROYECTO -->
           <v-list-item :to="{ name: 'ProjectForm' }">
             <v-list-item-icon>
-              <v-icon>mdi-home</v-icon>
+              <v-icon>mdi-plus</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>Crear Proyecto</v-list-item-title>
@@ -54,22 +54,24 @@
             </template>
 
             <v-list-item
-              link
-              v-for="project in listOfProjects"
-              :key="project.id"
-            >
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-list-item-title v-bind="attrs" v-on="on">
+                link
+                v-for="project in listOfProjects"
+                :key="project.id"
+              >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-list-item-title v-bind="attrs" v-on="on">
+                      {{ project.name }}
+                    </v-list-item-title>
+                  </template>
+                  <span>
                     {{ project.name }}
-                  </v-list-item-title>
-                </template>
-                <span>
-                  {{ project.name }}
-                </span>
-              </v-tooltip>
-            </v-list-item>
+                  </span>
+                </v-tooltip>
+              </v-list-item>
           </v-list-group>
+
+          
 
           <!-- ADMINISTRACION -->
 
@@ -79,8 +81,8 @@
                 <v-list-item-title>Administracion</v-list-item-title>
               </v-list-item-content>
             </template>
-            <v-list-item link v-for="list in listAdmin" :key="list.id">
-              <v-list-item-title v-bind="attrs" v-on="on">
+            <v-list-item v-for="list in listAdmin" :key="list.id" :to="{name: list.path}">
+              <v-list-item-title>
                 {{ list.name }}
               </v-list-item-title>
             </v-list-item>
@@ -101,12 +103,16 @@ export default {
         { id: 2, name: "Praesentium accusantium" },
       ],
       listAdmin: [
-        { id: 1, name: "Clasificacion", ruta: "clasificacion" },
-        { id: 2, name: "Categoria", ruta: "categoria" },
-        { id: 3, name: "Permisos", ruta: "permisos" },
-        { id: 4, name: "Estado", ruta: "estado" },
+        { id: 1, name: "Categoria", path: "ManagmentCategory" },
+        { id: 2, name: "Clasificacion", path: "ManagmentClassification" },
+        { id: 3, name: "Permisos", path: "ManagmentPermits" },
+        { id: 4, name: "Estado Visita", path: "ManagmentVisitingState" },
       ],
       drawer: false,
+      admin: false,
+      /* Tooltip */
+      on:true,
+      attrs:{},
     };
   },
 };
