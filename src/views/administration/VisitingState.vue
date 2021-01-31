@@ -1,11 +1,21 @@
 <template>
   <div>
-    <v-chip class="mb-5" color="secondary" label  text-color="white">
+    <v-row class="my-5 mx-1">
+
+    <v-chip color="secondary" label  text-color="white">
       Estado de Visita
       <v-icon right>
         mdi-text-box-plus
       </v-icon>
     </v-chip>
+    <v-spacer></v-spacer>
+    <v-btn color="primary" dark @click="create()">
+        Crear
+        <v-icon right>
+          mdi-plus
+        </v-icon>
+      </v-btn>
+    </v-row>
     <!-- START TABLE -->
     <template>
       <v-simple-table>
@@ -30,7 +40,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in listClassification" :key="item.nombre">
+            <tr v-for="(item, index) in listState" :key="item.nombre">
               <td>{{ index + 1 }}</td>
 
               <td>{{ item.nombre }}</td>
@@ -72,9 +82,9 @@
     <v-dialog v-model="dialog" persistent max-width="600">
       <v-card>
         <v-card-title>
-          <span class="headline">Crear Clasificacion</span>
+          <span class="headline">Crear Estado de Visita</span>
         </v-card-title>
-        <v-form @submit.prevent="createClassification">
+        <v-form @submit.prevent="createState">
           <v-card-text>
             <!-- INPUT -->
             <v-text-field
@@ -115,9 +125,9 @@
     <v-dialog v-model="dialogEdit" persistent max-width="600">
       <v-card>
         <v-card-title>
-          <span class="headline">Editar Clasificacion</span>
+          <span class="headline">Editar Estado </span>
         </v-card-title>
-        <v-form @submit.prevent="editClassification">
+        <v-form @submit.prevent="editState">
           <v-card-text>
             <!-- INPUT -->
             <v-text-field
@@ -172,27 +182,33 @@
 
 <script>
 export default {
-  name: "Classification",
+  name: "VisitingState",
   data() {
     return {
-      listClassification: [
+      listState: [
         {
           id: 1,
-          nombre: "Fisica",
+          nombre: "Visita Posterior",
           material_color: "primary",
           visible: true,
         },
         {
           id: 2,
-          nombre: "Geofisica",
+          nombre: "Visita Previa",
           material_color: "warning",
           visible: true,
         },
         {
           id: 3,
-          nombre: "Geologia",
+          nombre: "Cancelado",
           material_color: "pink",
           visible: false,
+        },
+        {
+          id: 4,
+          nombre: "Terminado",
+          material_color: "success",
+          visible: true,
         },
       ],
       dialog: false,
@@ -200,8 +216,8 @@ export default {
 
       nombre: "",
       color: null,
-      indexClassification: null,
-      idClassification: null,
+      indexState: null,
+      idState: null,
       /* Snackbar */
       snackbar: {
         state: false,
@@ -219,37 +235,37 @@ export default {
       this.dialog = true;
     },
     changeState(valor, index) {
-      this.listClassification[index].visible = valor;
-      this.showSnackbar("Clasificacion Actualizada", "success");
+      this.listState[index].visible = valor;
+      this.showSnackbar("Estado Actualizada", "success");
     },
-    createClassification() {
+    createState() {
       //Default Color
       this.color = "secondary";
 
       if (this.validate(this.nombre, this.color)) {
-        this.listClassification.push({
+        this.listState.push({
           id: Date.now(),
           nombre: this.nombre,
           material_color: this.color,
           visible: true,
         });
-        this.showSnackbar("Clasificación Agregado", "primary");
+        this.showSnackbar("Estado Agregado", "primary");
       }
       this.settingdata();
     },
     edit(index) {
-      this.nombre = this.listClassification[index].nombre;
-      this.color = this.listClassification[index].material_color;
-      this.indexClassification = index;
+      this.nombre = this.listState[index].nombre;
+      this.color = this.listState[index].material_color;
+      this.indexState = index;
       this.dialogEdit = true;
     },
-    editClassification() {
+    editState() {
       if (this.validate(this.nombre, this.color)) {
-        this.listClassification[this.indexClassification].nombre = this.nombre;
-        this.listClassification[
-          this.indexClassification
+        this.listState[this.indexState].nombre = this.nombre;
+        this.listState[
+          this.indexState
         ].material_color = this.color;
-        this.showSnackbar("Clasificacion Editado", "success");
+        this.showSnackbar("Estado Editado", "success");
         this.settingdata();
       }
     },
@@ -274,7 +290,7 @@ export default {
         return false;
       } else if (nombre.length === 0) {
         this.showSnackbar(
-          "El campo del nombre de la Clasificación esta vacio",
+          "El campo del nombre del estado de la visita esta vacio",
           "red"
         );
         return false;
