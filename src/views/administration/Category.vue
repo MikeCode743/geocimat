@@ -126,7 +126,7 @@
     <v-dialog v-model="dialogEdit" persistent max-width="600">
       <v-card>
         <v-card-title>
-          <span class="headline">Crear Categoria</span>
+          <span class="headline">Editar Categoria</span>
         </v-card-title>
         <v-form @submit.prevent="editCategory">
           <v-card-text>
@@ -247,12 +247,11 @@ export default {
     };
   },
   methods: {
-    create(){
-      this.settingdata()
-      this.dialog =true
+    create() {
+      this.settingdata();
+      this.dialog = true;
     },
     createCategory() {
-      console.log("crear");
       this.color = "secondary";
 
       if (this.validate(this.name, this.color)) {
@@ -275,7 +274,7 @@ export default {
       this.listCategory = this.listCategory.filter(
         (element) => element.id != this.idCategory
       );
-      this.showSnackbar("Categoria Eliminado", "orange darken-4");
+      this.showSnackbar("Categoria Eliminado", "red");
     },
     edit(index) {
       this.name = this.listCategory[index].name;
@@ -287,30 +286,29 @@ export default {
       if (this.validate(this.name, this.color)) {
         this.listCategory[this.indexCategory].name = this.name;
         this.listCategory[this.indexCategory].color = this.color;
-        this.showSnackbar("Categoria Editado", "purple darken-1");
+        this.showSnackbar("Categoria Editado", "success");
         this.settingdata();
       }
     },
 
     validate(name, color) {
-      let validated = true;
       if (color === null && name.length == 0) {
         this.showSnackbar(
           "Los campos de nombre y color estan vacios",
-          "red darken-1"
+          "red"
         );
-        validated = false;
+        return false;
       } else if (name.length === 0) {
         this.showSnackbar(
           "El campo del nombre de la categoria esta vacio",
-          "red darken-1"
+          "red"
         );
-        validated = false;
+        return false;
       } else if (color === null) {
-        this.showSnackbar("El color esta vacio", "red darken-1");
-        validated = false;
+        this.showSnackbar("El color esta vacio", "red");
+        return false;
       }
-      return validated;
+      return true;
     },
     showSnackbar(message, color) {
       this.snackbar.message = message;
