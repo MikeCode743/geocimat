@@ -71,17 +71,6 @@
                   </template>
                   <span>Editar</span>
                 </v-tooltip>
-                <!-- BTN Delete -->
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn icon @click="confirmDelete(item.id)">
-                      <v-icon dark v-bind="attrs" v-on="on">
-                        mdi-delete
-                      </v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Eliminar</span>
-                </v-tooltip>
               </td>
             </tr>
           </tbody>
@@ -132,7 +121,7 @@
     </v-dialog>
     <!-- END MODAL CREATE -->
 
-    <!-- START MODAL EDIt -->
+    <!-- START MODAL EDIT -->
     <v-dialog v-model="dialogEdit" persistent max-width="600">
       <v-card>
         <v-card-title>
@@ -175,32 +164,7 @@
     </v-dialog>
     <!-- END MODAL EDIT -->
 
-    <!-- START MODAL DELETE -->
-    <v-dialog v-model="dialogDelete" max-width="290">
-      <v-card>
-        <v-card-title class="headline">
-          Eliminar Categoria
-        </v-card-title>
-
-        <v-card-text>
-          ¿Seguro de eliminar la categoria?
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-
-          <v-btn color="red darken-1" text @click="deleteClassification()">
-            Eliminar
-          </v-btn>
-          <v-btn color="green darken-1" text @click="dialogDelete = false">
-            Cancelar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <!-- END MODAL DELETE -->
-
-    <!-- START SNACBAR -->
+    <!-- START SNACKBAR -->
     <v-snackbar
       v-model="snackbar.state"
       :timeout="3000"
@@ -243,7 +207,6 @@ export default {
       ],
       dialog: false,
       dialogEdit: false,
-      dialogDelete: false,
 
       nombre: "",
       color: null,
@@ -267,7 +230,7 @@ export default {
     },
     changeState(valor, index) {
       this.listClassification[index].visible = valor;
-      this.showSnackbar("Clasificacion Actualizada","success")
+      this.showSnackbar("Clasificacion Actualizada", "success");
     },
     createClassification() {
       //Default Color
@@ -280,20 +243,9 @@ export default {
           material_color: this.color,
           visible: true,
         });
-        this.showSnackbar("Categoria Agregado", "primary");
+        this.showSnackbar("Clasificación Agregado", "primary");
       }
       this.settingdata();
-    },
-    confirmDelete(id) {
-      this.idClassification = id;
-      this.dialogDelete = true;
-    },
-    deleteClassification() {
-      this.dialogDelete = false;
-      this.listClassification = this.listClassification.filter(
-        (element) => element.id != this.idClassification
-      );
-      this.showSnackbar("Categoria Eliminado", "danger");
     },
     edit(index) {
       this.nombre = this.listClassification[index].nombre;
@@ -307,7 +259,7 @@ export default {
         this.listClassification[
           this.indexClassification
         ].material_color = this.color;
-        this.showSnackbar("Categoria Editado", "success");
+        this.showSnackbar("Clasificacion Editado", "success");
         this.settingdata();
       }
     },
@@ -327,17 +279,17 @@ export default {
       if (color === null && nombre.length == 0) {
         this.showSnackbar(
           "Los campos de nombre y color estan vacios",
-          "danger"
+          "red"
         );
         return false;
       } else if (nombre.length === 0) {
         this.showSnackbar(
-          "El campo del nombre de la categoria esta vacio",
-          "danger"
+          "El campo del nombre de la Clasificación esta vacio",
+          "red"
         );
         return false;
       } else if (color === null) {
-        this.showSnackbar("El color esta vacio", "danger");
+        this.showSnackbar("El color esta vacio", "red");
         return false;
       }
       return true;
