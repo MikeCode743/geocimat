@@ -23,7 +23,15 @@ const routes = [
     path: "/proyecto/registrar",
     name: "ProjectForm",
     component: () =>
-      import(/* webpackChunkName: "about" */ "../views/project/ProjectForm"),
+      import(/* webpackChunkName: "about" */ "../views/Project/ProjectForm"),
+  },
+  {
+    path: "/proyecto/:id/detalle",
+    name: "ProjectDetail",
+    component: () =>
+      import(
+        /* webpackChunkName: "about" */ "../views/Project/ProjectRepository"
+      ),
   },
 
   /* ROUTES OF ADMINISTRATION */
@@ -33,7 +41,7 @@ const routes = [
     name: "ProjectCalendar",
     component: () =>
       import(
-        /* webpackChunkName: "about" */ "../views/project/ProjectCalendar"
+        /* webpackChunkName: "about" */ "../views/Project/ProjectCalendar"
       ),
   },
   {

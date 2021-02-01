@@ -1,5 +1,15 @@
 <template>
   <div>
+    <v-row class="my-5 mx-1">
+      <v-chip color="secondary" label text-color="white">
+        <h3>
+          {{ $route.params.id }}
+        </h3>
+        <v-icon right>
+          mdi-text-box-plus
+        </v-icon>
+      </v-chip>
+    </v-row>
     <v-toolbar>
       <v-tabs dark background-color="primary" grow v-model="tab">
         <v-tab>
@@ -23,6 +33,7 @@
     </v-toolbar>
 
     <v-card class="mt-2" v-if="tab === 0">
+      <!-- START TABLE -->
       <v-data-table
         :headers="headers"
         :items="fileList"
@@ -39,40 +50,16 @@
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-btn color="primary" dark class="mb-2"> Agregar Archivo </v-btn>
-
-            <v-dialog v-model="dialogDelete" max-width="500px">
-              <v-card>
-                <v-card-title class="headline">
-                  {{ deleteFileText }}
-                </v-card-title>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="red darken-1" text @click="deleteItemConfirm">
-                    Aceptar
-                  </v-btn>
-                  <v-btn
-                    color="blue darken-1"
-                    text
-                    @click="dialogDelete = false"
-                  >
-                    Cancelar
-                  </v-btn>
-
-                  <v-spacer></v-spacer>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
           </v-toolbar>
         </template>
-        <template>
-        <!-- <template v-slot:item.delete="{ item }"> -->
+        <template v-slot:[`item.delete`]="{ item }">
           <v-icon @click="deleteItem(item)"> mdi-delete </v-icon>
         </template>
-        <template>
-        <!-- <template v-slot:item.download="{ item }"> -->
+        <template v-slot:[`item.download`]="{ item }">
           <v-icon @click="downloadFile(item)"> mdi-download</v-icon>
         </template>
       </v-data-table>
+      <!-- END TABLE -->
     </v-card>
 
     <v-card class="pa-2 mt-2" v-if="tab === 1">
@@ -131,13 +118,33 @@
         alt="picture.name"
       ></v-img>
 
-      <v-card-title>Nombre del Proyecto</v-card-title>
+      <v-card-title>Nombre del Proyecto: {{ projectData }} </v-card-title>
       <v-card-text>
         <v-chip>Categoria</v-chip>
       </v-card-text>
       <v-divider class="mx-4"></v-divider>
       <v-card-title>Descripción</v-card-title>
     </v-card>
+
+    <!-- START MODAL DELETE -->
+    <v-dialog v-model="dialogDelete" max-width="500px">
+      <v-card>
+        <v-card-title class="headline">
+          {{ deleteFileText }}
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="deleteItemConfirm">
+            Aceptar
+          </v-btn>
+          <v-btn color="blue darken-1" text @click="dialogDelete = false">
+            Cancelar
+          </v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- END MODAL -->
   </div>
 </template>
 
@@ -145,15 +152,9 @@
 export default {
   name: "TestContainer",
 
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-
   data() {
     return {
+      idProject: "",
       tab: 0,
       sizeCols: 4,
       currentFile: {},
@@ -217,6 +218,9 @@ export default {
       }
 
       return this.sizeCols;
+    },
+    projectData() {
+      return (this.idProject = this.$route.params.id);
     },
   },
 

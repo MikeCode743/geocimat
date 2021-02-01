@@ -11,7 +11,7 @@
 
 <script>
 import HelloWorld from "./components/HelloWorld";
-import ToolbarComponent from "./components/layouts/Toolbar";
+import ToolbarComponent from "./components/Layouts/Toolbar";
 
 
 export default {

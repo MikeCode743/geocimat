@@ -57,6 +57,7 @@
                 link
                 v-for="project in listOfProjects"
                 :key="project.id"
+                :to="{name:'ProjectDetail', params:{id:project.name}}"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
