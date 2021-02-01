@@ -11,36 +11,39 @@
       </v-chip>
     </v-row>
     <!-- START CONTENT -->
-    <v-row>
-      <v-col cols="8" offset="2">
         <template>
-          <v-expansion-panels>
-            <v-expansion-panel
-              v-for="(item, index) in listPermits"
-              :key="index"
+          <div>
+            <v-data-table
+              :headers="headers"
+              :items="listPermits"
+              item-key="item.id"
+              class="elevation-1"
+              :search="search"
+              :custom-filter="filterOnlyCapsText"
             >
-              <v-expansion-panel-header>
-                {{ item.username }}
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <!-- Listado Completo -->
+              <template v-slot:top>
+                <v-text-field
+                  v-model="search"
+                  label="Buscar (SÓLO MAYÚSCULAS)"
+                  class="mx-4"
+                  prepend-inner-icon="mdi-account-search"
+                ></v-text-field>
+              </template>
+              <template v-slot:[`item.listado_completo`]="{ item }">
                 <v-switch
-                  label="Listado Completo"
                   :input-value="item.listado_completo"
-                  @change="(value) => changeState(value, index, 1)"
+                  @change="(value) => changeState(value, item.id, 1)"
                 ></v-switch>
-                <!-- Panel de administracion -->
+              </template>
+              <template v-slot:[`item.panel_administrativo`]="{ item }">
                 <v-switch
-                  label="Panel de administracion"
                   :input-value="item.panel_administrativo"
-                  @change="(value) => changeState(value, index, 2)"
+                  @change="(value) => changeState(value, item.id, 2)"
                 ></v-switch>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-expansion-panels>
+              </template>
+            </v-data-table>
+          </div>
         </template>
-      </v-col>
-    </v-row>
     <!-- START SNACKBAR -->
     <v-snackbar
       v-model="snackbar.state"
@@ -93,6 +96,8 @@ export default {
           panel_administrativo: false,
         },
       ],
+
+      search: "",
       //new permits:
       permits: {},
       //Dialog
@@ -108,18 +113,39 @@ export default {
       attrs: {},
     };
   },
+  computed: {
+    headers() {
+      return [
+        {
+          text: "Usuarios",
+          align: "start",
+          value: "username",
+        },
+        {
+          text: "Listados Completos",
+          value: "listado_completo",
+          align: "start",
+          sortable: false,
+        },
+        {
+          text: "Panel Administrativo",
+          value: "panel_administrativo",
+          align: "start",
+          sortable: false,
+        },
+      ];
+    },
+  },
   methods: {
-    changeState(value, index, opcion) {
+    changeState(value, id, opcion) {
       switch (opcion) {
         case 1:
-          this.listPermits[index].listado_completo = value;
           this.showSnackbar(
             "Permiso Actualizado - Listados Completos",
             "success"
           );
           break;
         case 2:
-          this.listPermits[index].panel_administrativo = value;
           this.showSnackbar(
             "Permiso Actualizado - Panel Administrativo",
             "success"
@@ -129,6 +155,17 @@ export default {
         default:
           break;
       }
+    },
+    filterOnlyCapsText(value, search, item) {
+      return (
+        value != null &&
+        search != null &&
+        typeof value === "string" &&
+        value
+          .toString()
+          .toLocaleUpperCase()
+          .indexOf(search) !== -1
+      );
     },
     showSnackbar(message, color) {
       this.snackbar.message = message;
