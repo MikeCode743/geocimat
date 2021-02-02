@@ -1,11 +1,23 @@
 <template>
   <v-container fluid>
-    <v-chip class="mb-5" color="secondary" label text-color="white">
-      Calendario
-      <v-icon right> mdi-calendar-month </v-icon>
-    </v-chip>
+    <v-row>
+      <v-chip class="mb-5" color="secondary" label dark>
+        Calendario
+        <v-icon right> mdi-calendar-month </v-icon>
+      </v-chip>
+      <v-spacer></v-spacer>
+      <v-btn color="primary" dark @click="dialog = true">
+        Crear
+        <v-icon right>
+          mdi-plus
+        </v-icon>
+      </v-btn>
+    </v-row>
 
-    <v-chip-group mandatory active-class="primary--text">
+    <v-chip-group mandatory active-class="mt-2 white--text elevation-10">
+      <v-chip color="secondary" @click="idStatusFiltered = -1" dark>
+        Mostrar Todos
+      </v-chip>
       <v-chip
         v-for="statuses in visitStatuses"
         :key="statuses.id"
@@ -26,6 +38,69 @@
         :event-color="getEventColor"
       ></v-calendar>
     </v-sheet>
+
+    <!-- START MODAL CREATE -->
+    <v-dialog v-model="dialog">
+      <v-card>
+        <v-form @submit.prevent="assignDate">
+          <v-card-title>
+            Asignar Fecha
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col>
+                <v-autocomplete
+                  auto-select-first
+                  clearable
+                  v-model="project"
+                  :items="projects"
+                  label="Proyecto "
+                ></v-autocomplete>
+
+                <v-select
+                  v-model="idStatus"
+                  :items="visitStatuses"
+                  item-text="nombre"
+                  item-value="id"
+                  label="Estado de la visita"
+                ></v-select>
+
+                <v-textarea
+                  v-model="description"
+                  auto-grow
+                  label="Descripcion"
+                ></v-textarea>
+              </v-col>
+              <v-col>
+                <v-chip
+                  class="d-flex justify-center mb-3"
+                  :color="chip.color"
+                  label
+                  dark
+                >
+                  <v-icon left> mdi-check-circle</v-icon>
+                  {{ chip.info }}
+                </v-chip>
+                <v-date-picker full-width locale="es-sv" v-model="dates" range></v-date-picker>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="dialog = false">Cancelar</v-btn>
+            <v-btn
+              color="blue darken-1"
+              text
+              type="submit"
+              @click="dialog = false"
+            >
+              Guardar
+            </v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-dialog>
+    <!-- END MODAL CREATE -->
   </v-container>
 </template>
 
@@ -41,6 +116,19 @@ export default {
     return {
       value: "",
       idStatusFiltered: -1,
+
+      dialog: false,
+
+      projects: ["Volcan de San Miguel", "Jardin Botanico", "Boqueron", "Volcan de Santa Ana"],
+      dates: [],
+      project: "",
+      description: "",
+      idStatus: "",
+
+      chip: {
+        info: "Seleccionar la o las fechas de visita",
+        color: "grey",
+      },
 
       colors: [
         "blue",
@@ -58,12 +146,6 @@ export default {
       },
 
       visitStatuses: [
-        {
-          id: -1,
-          nombre: "Mostrar Todos",
-          material_color: "",
-          visible: true,
-        },
         {
           id: 1,
           nombre: "A Visitar",
@@ -124,6 +206,24 @@ export default {
   methods: {
     getEventColor(event) {
       return event.material_color;
+    },
+    assignDate() {
+      let status = this.visitStatuses.find(
+        (element) => element.id == this.idStatus
+      );
+
+      if (this.dates[0] >= this.dates[1]) {
+        this.dates = this.dates.reverse();
+        console.log(this.dates);
+      }
+
+      this.scheduledVisits.push({
+        name: this.project,
+        start: this.dates[0],
+        end: this.dates[1],
+        id_status: this.idStatus,
+        material_color: status.material_color,
+      });
     },
   },
 };

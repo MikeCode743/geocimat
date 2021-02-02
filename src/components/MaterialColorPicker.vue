@@ -5,6 +5,7 @@
           v-model="formData.colorSelected"
           :items="materialColorAvailable"
           chips
+          
           label="Seleccionar Color"
         >
           <template v-slot:selection="data">
