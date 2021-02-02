@@ -8,20 +8,18 @@
       <v-spacer></v-spacer>
       <v-btn color="primary" dark @click="dialog = true">
         Crear
-        <v-icon right>
-          mdi-plus
-        </v-icon>
+        <v-icon right> mdi-plus </v-icon>
       </v-btn>
     </v-row>
 
-    <v-chip-group mandatory active-class="mt-2 white--text elevation-10">
+    <v-chip-group mandatory active-class="white--text mt-3">
       <v-chip color="secondary" @click="idStatusFiltered = -1" dark>
         Mostrar Todos
       </v-chip>
       <v-chip
         v-for="statuses in visitStatuses"
         :key="statuses.id"
-        :color="statuses.material_color"
+        :color="statuses.materialColor"
         @click="idStatusFiltered = statuses.id"
         dark
       >
@@ -43,22 +41,20 @@
     <v-dialog v-model="dialog">
       <v-card>
         <v-form @submit.prevent="assignDate">
-          <v-card-title>
-            Asignar Fecha
-          </v-card-title>
+          <v-card-title> Asignar Fecha </v-card-title>
           <v-card-text>
             <v-row>
               <v-col>
                 <v-autocomplete
                   auto-select-first
                   clearable
-                  v-model="project"
+                  v-model="visitInfo.project"
                   :items="projects"
                   label="Proyecto "
                 ></v-autocomplete>
 
                 <v-select
-                  v-model="idStatus"
+                  v-model="visitInfo.idStatus"
                   :items="visitStatuses"
                   item-text="nombre"
                   item-value="id"
@@ -66,13 +62,13 @@
                 ></v-select>
 
                 <v-textarea
-                  v-model="description"
+                  v-model="visitInfo.description"
                   auto-grow
                   label="Descripcion"
                 ></v-textarea>
               </v-col>
               <v-col>
-                <v-chip
+                <!-- <v-chip
                   class="d-flex justify-center mb-3"
                   :color="chip.color"
                   label
@@ -80,8 +76,14 @@
                 >
                   <v-icon left> mdi-check-circle</v-icon>
                   {{ chip.info }}
-                </v-chip>
-                <v-date-picker full-width locale="es-sv" v-model="dates" range></v-date-picker>
+                </v-chip> -->
+                <v-date-picker
+                  full-width
+                  locale="es-sv"
+                  v-model="visitInfo.dates"
+                  range
+                >
+                </v-date-picker>
               </v-col>
             </v-row>
           </v-card-text>
@@ -119,15 +121,18 @@ export default {
 
       dialog: false,
 
-      projects: ["Volcan de San Miguel", "Jardin Botanico", "Boqueron", "Volcan de Santa Ana"],
-      dates: [],
-      project: "",
-      description: "",
-      idStatus: "",
+      projects: [
+        "Volcan de San Miguel",
+        "Jardin Botanico",
+        "Boqueron",
+        "Volcan de Santa Ana",
+      ],
 
-      chip: {
-        info: "Seleccionar la o las fechas de visita",
-        color: "grey",
+      visitInfo: {
+        project: "",
+        idStatus: "",
+        description: "",
+        dates: [],
       },
 
       colors: [
@@ -140,28 +145,23 @@ export default {
         "grey darken-1",
       ],
 
-      snackbar: {
-        visible: false,
-        text: "",
-      },
-
       visitStatuses: [
         {
           id: 1,
           nombre: "A Visitar",
-          material_color: "indigo",
+          materialColor: "indigo",
           visible: true,
         },
         {
           id: 2,
           nombre: "Cancelado",
-          material_color: "orange",
+          materialColor: "orange",
           visible: false,
         },
         {
           id: 3,
           nombre: "Pendiente de aprobación",
-          material_color: "green darken-1",
+          materialColor: "green darken-1",
           visible: true,
         },
       ],
@@ -172,21 +172,21 @@ export default {
           start: "2021-02-01",
           end: "2021-02-03",
           id_status: 1,
-          material_color: "indigo",
+          materialColor: "indigo",
         },
         {
           name: "Cerro el pital",
           start: new Date("Feb 5, 2021 07:22:13"),
           end: new Date("Feb 8, 2021 07:22:13"),
           id_status: 2,
-          material_color: "orange",
+          materialColor: "orange",
         },
         {
           name: "Cerro el pital",
           start: "2021-02-01",
           end: "2021-02-02",
           id_status: 3,
-          material_color: "green",
+          materialColor: "green",
         },
       ],
     };
@@ -205,24 +205,20 @@ export default {
 
   methods: {
     getEventColor(event) {
-      return event.material_color;
+      return event.materialColor;
     },
+
     assignDate() {
-      let status = this.visitStatuses.find(
-        (element) => element.id == this.idStatus
-      );
-
-      if (this.dates[0] >= this.dates[1]) {
-        this.dates = this.dates.reverse();
-        console.log(this.dates);
-      }
-
+      //Esto cambiará a una petición solo quedará el objeto para guardarlo
+      let [startDate, endDate] = this.visitInfo.dates;
       this.scheduledVisits.push({
-        name: this.project,
-        start: this.dates[0],
-        end: this.dates[1],
-        id_status: this.idStatus,
-        material_color: status.material_color,
+        name: this.visitInfo.project,
+        start: startDate,
+        end: endDate || startDate,
+        id_status: this.scheduledVisits.length + 1,
+        materialColor: this.visitStatuses.find(
+          (element) => element.id === this.visitInfo.idStatus
+        ).materialColor,
       });
     },
   },
