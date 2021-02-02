@@ -97,7 +97,9 @@
             ></v-text-field>
 
             <!-- COMPONENT  -->
-
+            <MaterialColorPicker
+              v-bind:formData="formData"
+            ></MaterialColorPicker>
             <!-- COMPONENT -->
 
             <small>* indica un campo obligatorio</small>
@@ -140,7 +142,9 @@
             ></v-text-field>
 
             <!-- COMPONENT  -->
-
+            <MaterialColorPicker
+              v-bind:formData="formData"
+            ></MaterialColorPicker>
             <!-- COMPONENT -->
 
             <small>* indica un campo obligatorio</small>
@@ -181,21 +185,31 @@
 </template>
 
 <script>
+
+import MaterialColorPicker from "@/components/MaterialColorPicker";
+
+
 export default {
   name: "Classification",
+
+  components: {
+    MaterialColorPicker,
+  },
+
+
   data() {
     return {
       listClassification: [
         {
           id: 1,
           nombre: "Fisica",
-          material_color: "primary",
+          material_color: "blue",
           visible: true,
         },
         {
           id: 2,
           nombre: "Geofisica",
-          material_color: "warning",
+          material_color: "yellow",
           visible: true,
         },
         {
@@ -205,6 +219,12 @@ export default {
           visible: false,
         },
       ],
+
+formData: {
+        otroAtributo: true,
+        colorSelected: "blue",
+      },
+
       dialog: false,
       dialogEdit: false,
 
@@ -233,14 +253,12 @@ export default {
       this.showSnackbar("Clasificacion Actualizada", "success");
     },
     createClassification() {
-      //Default Color
-      this.color = "secondary";
 
-      if (this.validate(this.nombre, this.color)) {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
         this.listClassification.push({
           id: Date.now(),
           nombre: this.nombre,
-          material_color: this.color,
+          material_color: this.formData.colorSelected,
           visible: true,
         });
         this.showSnackbar("Clasificación Agregado", "primary");
@@ -249,16 +267,16 @@ export default {
     },
     edit(index) {
       this.nombre = this.listClassification[index].nombre;
-      this.color = this.listClassification[index].material_color;
+      this.formData.colorSelected = this.listClassification[index].material_color;
       this.indexClassification = index;
       this.dialogEdit = true;
     },
     editClassification() {
-      if (this.validate(this.nombre, this.color)) {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
         this.listClassification[this.indexClassification].nombre = this.nombre;
         this.listClassification[
           this.indexClassification
-        ].material_color = this.color;
+        ].material_color = this.formData.colorSelected;
         this.showSnackbar("Clasificacion Editado", "success");
         this.settingdata();
       }
@@ -271,16 +289,14 @@ export default {
     },
     settingdata() {
       this.nombre = "";
-      this.color = null;
       this.indexClassification = null;
       this.idClassification = null;
+      this.formData.colorSelected = "blue"
+
     },
     validate(nombre, color) {
       if (color === null && nombre.length == 0) {
-        this.showSnackbar(
-          "Los campos de nombre y color estan vacios",
-          "red"
-        );
+        this.showSnackbar("Los campos de nombre y color estan vacios", "red");
         return false;
       } else if (nombre.length === 0) {
         this.showSnackbar(

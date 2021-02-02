@@ -1,15 +1,14 @@
 <template>
   <div>
     <v-row class="my-5 mx-1">
-
-    <v-chip color="secondary" label  text-color="white">
-      Estado de Visita
-      <v-icon right>
-        mdi-text-box-plus
-      </v-icon>
-    </v-chip>
-    <v-spacer></v-spacer>
-    <v-btn color="primary" dark @click="create()">
+      <v-chip color="secondary" label text-color="white">
+        Estado de Visita
+        <v-icon right>
+          mdi-text-box-plus
+        </v-icon>
+      </v-chip>
+      <v-spacer></v-spacer>
+      <v-btn color="primary" dark @click="create()">
         Crear
         <v-icon right>
           mdi-plus
@@ -97,7 +96,9 @@
             ></v-text-field>
 
             <!-- COMPONENT  -->
-
+            <MaterialColorPicker
+              v-bind:formData="formData"
+            ></MaterialColorPicker>
             <!-- COMPONENT -->
 
             <small>* indica un campo obligatorio</small>
@@ -140,7 +141,9 @@
             ></v-text-field>
 
             <!-- COMPONENT  -->
-
+            <MaterialColorPicker
+              v-bind:formData="formData"
+            ></MaterialColorPicker>
             <!-- COMPONENT -->
 
             <small>* indica un campo obligatorio</small>
@@ -181,21 +184,28 @@
 </template>
 
 <script>
+import MaterialColorPicker from "@/components/MaterialColorPicker";
+
 export default {
   name: "VisitingState",
+
+  components: {
+    MaterialColorPicker,
+  },
+
   data() {
     return {
       listState: [
         {
           id: 1,
           nombre: "Visita Posterior",
-          material_color: "primary",
+          material_color: "blue",
           visible: true,
         },
         {
           id: 2,
           nombre: "Visita Previa",
-          material_color: "warning",
+          material_color: "yellow",
           visible: true,
         },
         {
@@ -211,6 +221,11 @@ export default {
           visible: true,
         },
       ],
+      formData: {
+        otroAtributo: true,
+        colorSelected: "blue",
+      },
+
       dialog: false,
       dialogEdit: false,
 
@@ -239,14 +254,12 @@ export default {
       this.showSnackbar("Estado Actualizada", "success");
     },
     createState() {
-      //Default Color
-      this.color = "secondary";
 
-      if (this.validate(this.nombre, this.color)) {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
         this.listState.push({
           id: Date.now(),
           nombre: this.nombre,
-          material_color: this.color,
+          material_color: this.formData.colorSelected,
           visible: true,
         });
         this.showSnackbar("Estado Agregado", "primary");
@@ -255,16 +268,14 @@ export default {
     },
     edit(index) {
       this.nombre = this.listState[index].nombre;
-      this.color = this.listState[index].material_color;
+      this.formData.colorSelected = this.listState[index].material_color;
       this.indexState = index;
       this.dialogEdit = true;
     },
     editState() {
-      if (this.validate(this.nombre, this.color)) {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
         this.listState[this.indexState].nombre = this.nombre;
-        this.listState[
-          this.indexState
-        ].material_color = this.color;
+        this.listState[this.indexState].material_color = this.formData.colorSelected;
         this.showSnackbar("Estado Editado", "success");
         this.settingdata();
       }
@@ -277,16 +288,13 @@ export default {
     },
     settingdata() {
       this.nombre = "";
-      this.color = null;
       this.indexClassification = null;
       this.idClassification = null;
+      this.formData.colorSelected = "blue"
     },
     validate(nombre, color) {
       if (color === null && nombre.length == 0) {
-        this.showSnackbar(
-          "Los campos de nombre y color estan vacios",
-          "red"
-        );
+        this.showSnackbar("Los campos de nombre y color estan vacios", "red");
         return false;
       } else if (nombre.length === 0) {
         this.showSnackbar(
@@ -303,4 +311,3 @@ export default {
   },
 };
 </script>
-

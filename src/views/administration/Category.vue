@@ -98,6 +98,9 @@
             ></v-text-field>
 
             <!-- COMPONENT  -->
+            <MaterialColorPicker
+              v-bind:formData="formData"
+            ></MaterialColorPicker>
 
             <!-- COMPONENT -->
 
@@ -141,6 +144,9 @@
             ></v-text-field>
 
             <!-- COMPONENT  -->
+            <MaterialColorPicker
+              v-bind:formData="formData"
+            ></MaterialColorPicker>
 
             <!-- COMPONENT -->
 
@@ -206,20 +212,27 @@
   </div>
 </template>
 <script>
+import MaterialColorPicker from "@/components/MaterialColorPicker";
+
 export default {
   name: "category",
+
+  components: {
+    MaterialColorPicker,
+  },
+
   data() {
     return {
       listCategory: [
         {
           id: 1,
           name: "Sin Procesar",
-          color: "primary",
+          color: "blue",
         },
         {
           id: 2,
           name: "Procesado",
-          color: "warning",
+          color: "yellow",
         },
         {
           id: 3,
@@ -227,6 +240,11 @@ export default {
           color: "pink",
         },
       ],
+      formData: {
+        otroAtributo: true,
+        colorSelected: "blue",
+      },
+
       dialog: false,
       dialogEdit: false,
       dialogDelete: false,
@@ -252,13 +270,12 @@ export default {
       this.dialog = true;
     },
     createCategory() {
-      this.color = "secondary";
 
-      if (this.validate(this.name, this.color)) {
+      if (this.validate(this.name, this.formData.colorSelected)) {
         this.listCategory.push({
           id: Date.now(),
           name: this.name,
-          color: this.color,
+          color: this.formData.colorSelected,
         });
 
         this.showSnackbar("Categoria Agregado", "primary");
@@ -278,14 +295,15 @@ export default {
     },
     edit(index) {
       this.name = this.listCategory[index].name;
-      this.color = this.listCategory[index].color;
+      this.formData.colorSelected = this.listCategory[index].color
       this.indexCategory = index;
       this.dialogEdit = true;
     },
     editCategory() {
-      if (this.validate(this.name, this.color)) {
+      if (this.validate(this.name, this.formData.colorSelected)) {
         this.listCategory[this.indexCategory].name = this.name;
-        this.listCategory[this.indexCategory].color = this.color;
+        this.listCategory[this.indexCategory].color = this.formData.colorSelected;
+
         this.showSnackbar("Categoria Editado", "success");
         this.settingdata();
       }
@@ -293,10 +311,7 @@ export default {
 
     validate(name, color) {
       if (color === null && name.length == 0) {
-        this.showSnackbar(
-          "Los campos de nombre y color estan vacios",
-          "red"
-        );
+        this.showSnackbar("Los campos de nombre y color estan vacios", "red");
         return false;
       } else if (name.length === 0) {
         this.showSnackbar(
@@ -317,9 +332,9 @@ export default {
     },
     settingdata() {
       this.name = "";
-      this.color = null;
       this.indexCategory = null;
       this.idCategory = null;
+      this.formData.colorSelected = "blue"
     },
   },
 };
