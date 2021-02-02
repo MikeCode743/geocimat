@@ -14,14 +14,10 @@
       </v-btn>
     </v-row>
 
-<<<<<<< HEAD
     <v-chip-group mandatory active-class="mt-2 white--text elevation-10">
       <v-chip color="secondary" @click="idStatusFiltered = -1" dark>
         Mostrar Todos
       </v-chip>
-=======
-    <v-chip-group mandatory active-class="dark--text">
->>>>>>> 7efeba4e7c60665880cb7ad4847ac3778793aad4
       <v-chip
         v-for="statuses in visitStatuses"
         :key="statuses.id"
