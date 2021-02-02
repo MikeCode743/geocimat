@@ -54,35 +54,37 @@
             </template>
 
             <v-list-item
-                link
-                v-for="project in listOfProjects"
-                :key="project.id"
-                :to="{name:'ProjectDetail', params:{id:project.name}}"
-              >
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-list-item-title v-bind="attrs" v-on="on">
-                      {{ project.name }}
-                    </v-list-item-title>
-                  </template>
-                  <span>
+              link
+              v-for="project in listOfProjects"
+              :key="project.id"
+              :to="{ name: 'ProjectDetail', params: { id: project.name } }"
+            >
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-list-item-title v-bind="attrs" v-on="on">
                     {{ project.name }}
-                  </span>
-                </v-tooltip>
-              </v-list-item>
+                  </v-list-item-title>
+                </template>
+                <span>
+                  {{ project.name }}
+                </span>
+              </v-tooltip>
+            </v-list-item>
           </v-list-group>
-
-          
 
           <!-- ADMINISTRACION -->
 
           <v-list-group :value="false" no-action>
             <template v-slot:activator>
               <v-list-item-content>
-                <v-list-item-title>Administracion</v-list-item-title>
+                <v-list-item-title>Administraci&oacute;n</v-list-item-title>
               </v-list-item-content>
             </template>
-            <v-list-item v-for="list in listAdmin" :key="list.id" :to="{name: list.path}">
+            <v-list-item
+              v-for="list in listAdmin"
+              :key="list.id"
+              :to="{ name: list.path }"
+            >
               <v-list-item-title>
                 {{ list.name }}
               </v-list-item-title>
@@ -112,8 +114,8 @@ export default {
       drawer: false,
       admin: false,
       /* Tooltip */
-      on:true,
-      attrs:{},
+      on: true,
+      attrs: {},
     };
   },
 };
