@@ -1,15 +1,8 @@
 <template>
   <v-container fluid>
-    <v-chip
-      class="mb-5"
-      color="secondary"
-      label
-      text-color="white"
-    >
+    <v-chip class="mb-5" color="secondary" label text-color="white">
       Crear Proyecto.
-      <v-icon right>
-        mdi-text-box-plus
-      </v-icon>
+      <v-icon right> mdi-text-box-plus </v-icon>
     </v-chip>
     <v-form
       ref="form"
@@ -115,6 +108,7 @@
 </template>
 
 <script>
+import "../../assets/mapbox-gl.css";
 import Mapbox from "mapbox-gl";
 import { MglMap, MglMarker } from "vue-mapbox";
 
