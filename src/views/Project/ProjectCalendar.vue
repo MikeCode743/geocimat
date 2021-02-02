@@ -7,10 +7,11 @@
 
     <v-chip-group mandatory active-class="primary--text">
       <v-chip
-        v-for="statuses in calendarStatuses"
+        v-for="statuses in visitStatuses"
         :key="statuses.id"
         :color="statuses.material_color"
         @click="idStatusFiltered = statuses.id"
+        dark
       >
         {{ statuses.nombre }}
       </v-chip>
@@ -56,7 +57,7 @@ export default {
         text: "",
       },
 
-      calendarStatuses: [
+      visitStatuses: [
         {
           id: -1,
           nombre: "Mostrar Todos",
