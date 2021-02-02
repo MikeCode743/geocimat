@@ -5,7 +5,7 @@
       <v-icon right> mdi-calendar-month </v-icon>
     </v-chip>
 
-    <v-chip-group mandatory active-class="gery--text">
+    <v-chip-group mandatory active-class="dark--text">
       <v-chip
         v-for="statuses in visitStatuses"
         :key="statuses.id"
