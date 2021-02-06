@@ -12,20 +12,23 @@
       </v-btn>
     </v-row>
 
-    <v-chip-group mandatory active-class="white--text mt-3">
-      <v-chip color="secondary" @click="idStatusFiltered = -1" dark>
-        Mostrar Todos
-      </v-chip>
-      <v-chip
-        v-for="statuses in visitStatuses"
-        :key="statuses.id"
-        :color="statuses.materialColor"
-        @click="idStatusFiltered = statuses.id"
-        dark
-      >
-        {{ statuses.nombre }}
-      </v-chip>
-    </v-chip-group>
+    <v-row class="mt-0 mb-3">
+      <v-chip-group mandatory>
+        <v-chip color="secondary" @click="idStatusFiltered = -1" dark outlined>
+          Mostrar Todos
+        </v-chip>
+        <v-chip
+          v-for="statuses in visitStatuses"
+          :key="statuses.id"
+          :color="statuses.materialColor"
+          @click="idStatusFiltered = statuses.id"
+          outlined
+          dark
+        >
+          {{ statuses.nombre }}
+        </v-chip>
+      </v-chip-group>
+    </v-row>
 
     <v-sheet height="1000">
       <v-calendar
