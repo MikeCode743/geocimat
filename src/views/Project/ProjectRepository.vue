@@ -26,7 +26,8 @@
             Galería
           </v-badge>
         </v-tab>
-        <v-tab> Información</v-tab>
+        <v-tab>Información</v-tab>
+        <v-tab>Repositorio</v-tab>
       </v-tabs>
     </v-toolbar>
 
@@ -132,6 +133,12 @@
       <v-card-title>Descripción</v-card-title>
     </v-card>
 
+    <v-row class="mx-auto" v-if="tab === 3">
+      <v-col>
+        <RepositoryTreeView />
+      </v-col>
+    </v-row>
+
     <v-dialog v-model="dialogDelete" max-width="500px">
       <v-card>
         <v-card-title class="headline">
@@ -167,6 +174,8 @@
 </template>
 
 <script>
+import RepositoryTreeView from "@/views/Project/RepositoryTreeView";
+
 async function fetchFiles() {
   const response = await fetch(
     "https://aldebaran-wallet.herokuapp.com/aldebaran/bucket"
@@ -177,6 +186,10 @@ async function fetchFiles() {
 export default {
   name: "TestContainer",
 
+  components: {
+    RepositoryTreeView,
+  },
+
   data() {
     return {
       files: [],
@@ -186,7 +199,7 @@ export default {
         color: "",
       },
       idProject: "",
-      tab: 0,
+      tab: 3,
       sizeCols: 4,
       currentFile: {},
       dialogDelete: false,
