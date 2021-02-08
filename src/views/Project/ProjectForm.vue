@@ -56,8 +56,14 @@
           ></v-text-field>
         </v-col>
       </v-row>
-      <v-col cols="12" sm="12" class="px-8" :style="{ height: '650px' }">
+
+      <v-row class="d-flex" justify="center" :style="{ height: '650px' }">
         <MglMap
+          ref="mapToFly"
+          :style="{
+            height: '100%',
+            width: '100%',
+          }"
           :accessToken="accessToken"
           :mapStyle="mapStyle"
           :center="coordinateMap"
@@ -67,22 +73,54 @@
           @load="onMapLoaded"
         >
           <template v-if="showMarker">
-            <MglMarker :coordinates="coordinatePopUp" />
+            <MglMarker :coordinates="coordinatePopUp" @added="showRender" />
           </template>
+          <div class="mapboxgl-control-container">
+            <div
+              class="mapboxgl-ctrl-top-left"
+              :style="{
+                width: '45%',
+              }"
+            >
+              <div
+                class="mapboxgl-ctrl mapboxgl-ctrl-group"
+                :style="{
+                  width: '100%',
+                }"
+              >
+                <v-autocomplete
+                  v-model="selectedPlace"
+                  :search-input.sync="search"
+                  :items="places"
+                  :loading="isLoading"
+                  item-text="place_name"
+                  item-value="id"
+                  class="pa-3"
+                  flat
+                  hide-details
+                  label="Buscar"
+                  clearable
+                ></v-autocomplete>
+              </div>
+            </div>
+          </div>
         </MglMap>
-      </v-col>
-      <v-col cols="12" sm="12">
-        <v-textarea
-          :rules="rules.textAreaField"
-          v-model="form.description"
-          label="Descripción del proyecto"
-          rows="2"
-          value=""
-          counter
-          maxlength="25"
-          outlined
-        ></v-textarea>
-      </v-col>
+      </v-row>
+
+      <v-row class="mt-2">
+        <v-col cols="12" sm="12">
+          <v-textarea
+            :rules="rules.textAreaField"
+            v-model="form.description"
+            label="Descripción del proyecto"
+            rows="2"
+            value=""
+            counter
+            maxlength="25"
+            outlined
+          ></v-textarea>
+        </v-col>
+      </v-row>
 
       <v-btn color="grey lighten-2" @click="cleanForm" class="mr-4">
         Limpiar Formulario
@@ -110,7 +148,7 @@
 <script>
 import "../../assets/mapbox-gl.css";
 import Mapbox from "mapbox-gl";
-import { MglMap, MglMarker } from "vue-mapbox";
+import { MglMap, MglMarker, MglNavigationControl } from "vue-mapbox";
 
 const defaultForm = Object.freeze({
   projectName: "",
@@ -126,6 +164,7 @@ export default {
   components: {
     MglMap,
     MglMarker,
+    MglNavigationControl,
   },
 
   created() {
@@ -139,6 +178,12 @@ export default {
       mapStyle: "mapbox://styles/mapbox/satellite-streets-v11",
       coordinateMap: [-88.85, 13.82],
       zoomMap: 8,
+
+      mapbox: null,
+      selectedPlace: null,
+      isLoading: false,
+      search: null,
+      places: [],
 
       showMarker: false,
       coordinatePopUp: [0, 0],
@@ -194,6 +239,55 @@ export default {
     };
   },
 
+  watch: {
+    selectedPlace(val) {
+      if (val) {
+        const {
+          center: [lng, lat],
+        } = this.places.find((element) => {
+          if (element.id === val) {
+            return element;
+          }
+        });
+
+        this.coordinatePopUp = [lng, lat];
+        this.form.longitude = lng.toFixed(6);
+        this.form.latitude = lat.toFixed(6);
+        this.showMarker = true;
+        // asyncActions.flyTo({
+        //   center: [30, 30],
+        //   zoom: 9,
+        //   speed: 1,
+        // });
+        // this.mapbox.flyTo({
+        //   center: [this.form.longitude, this.form.latitude],
+        //   essential: true,
+        // });
+      } else {
+        this.showMarker = false;
+      }
+    },
+    search(val) {
+      if (val) {
+        this.isLoading = true;
+        const urlBase = `https://api.mapbox.com/geocoding/v5/mapbox.places/${val}.json?limit=5&access_token=pk.eyJ1Ijoia2VybmVsNTAzIiwiYSI6ImNrZHA5cmhiYTIwamgyeXBkOTgyZmU1cmkifQ.bK_Wbz4134Uf33qBDGklKg`;
+        fetch(new URL(urlBase))
+          .then((res) => res.clone().json())
+          .then((res) => {
+            console.log(res.features);
+            this.places = res.features;
+          })
+          .catch((err) => {
+            this.places = [];
+            console.log(err);
+          })
+          .finally(() => (this.isLoading = false));
+      } else {
+        this.places = [];
+      }
+    },
+  },
+
   methods: {
     cleanForm() {
       this.$refs.form.resetValidation();
@@ -232,6 +326,9 @@ export default {
         return;
       }
       this.showMarker = false;
+    },
+    showRender(event) {
+      console.log(event);
     },
   },
 };
