@@ -29,15 +29,37 @@
         </v-chip>
       </v-chip-group>
     </v-row>
-
     <v-sheet height="1000">
+      <v-toolbar flat>
+        <v-btn fab text small color="grey darken-2" @click="prev">
+          <v-icon small>
+            mdi-chevron-left
+          </v-icon>
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-toolbar-title v-if="$refs.calendar">
+          {{ $refs.calendar.title }}
+        </v-toolbar-title>
+        <v-toolbar-title v-if="!$refs.calendar">
+        {{ mes }}
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+
+        <v-btn fab text small color="grey darken-2" @click="next">
+          <v-icon small>
+            mdi-chevron-right
+          </v-icon>
+        </v-btn>
+      </v-toolbar>
       <v-calendar
         ref="calendar"
-        v-model="value"
+        v-model="focus"
         type="month"
         :events="getScheduled"
+        locale="es-sv"
         :event-color="getEventColor"
         @click:event="showProject"
+        @change="changeDate"
       ></v-calendar>
 
       <v-dialog v-model="show" max-width="650">
@@ -194,7 +216,7 @@
           <v-btn color="red darken-1" text @click="deleteVisit()">
             Eliminar
           </v-btn>
-          <v-btn  text @click="dialogDelete = false">
+          <v-btn text @click="dialogDelete = false">
             Cancelar
           </v-btn>
         </v-card-actions>
@@ -210,7 +232,10 @@ export default {
 
   components: {},
 
-  created() {},
+  created() {
+    this.mes = "febrero 2021";
+  },
+  mounted() {},
 
   data() {
     return {
@@ -231,6 +256,7 @@ export default {
 
       color: "",
       stateVisit: "",
+      focus: "",
 
       visitInfo: {
         id: null,
@@ -378,6 +404,18 @@ export default {
       this.show = false;
       this.dialogDelete = false;
       this.visitInfo = {};
+    },
+    prev() {
+      this.$refs.calendar.prev();
+      this.mes = "";
+    },
+    next() {
+      this.$refs.calendar.next();
+      this.mes = "";
+    },
+    changeDate() {
+      this.$refs.calendar.checkChange();
+      this.mes = "";
     },
   },
 };
