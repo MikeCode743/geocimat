@@ -59,11 +59,6 @@
 
       <v-row class="d-flex" justify="center" :style="{ height: '650px' }">
         <MglMap
-          ref="mapToFly"
-          :style="{
-            height: '100%',
-            width: '100%',
-          }"
           :accessToken="accessToken"
           :mapStyle="mapStyle"
           :center="coordinateMap"
@@ -72,9 +67,7 @@
           @click="setMarker"
           @load="onMapLoaded"
         >
-          <template v-if="showMarker">
-            <MglMarker :coordinates="coordinatePopUp" @added="showRender" />
-          </template>
+          <MglMarker :showed="showMarker" :coordinates="coordinatePopUp" />
           <div class="mapboxgl-control-container">
             <div
               class="mapboxgl-ctrl-top-left"
@@ -110,6 +103,7 @@
       <v-row class="mt-2">
         <v-col cols="12" sm="12">
           <v-textarea
+            @keyup.prevent
             :rules="rules.textAreaField"
             v-model="form.description"
             label="Descripción del proyecto"
@@ -187,6 +181,7 @@ export default {
 
       showMarker: false,
       coordinatePopUp: [0, 0],
+      mapEvent: null,
 
       items: [
         { value: "Programming", id: 1 },
@@ -240,7 +235,7 @@ export default {
   },
 
   watch: {
-    selectedPlace(val) {
+    async selectedPlace(val) {
       if (val) {
         const {
           center: [lng, lat],
@@ -249,24 +244,21 @@ export default {
             return element;
           }
         });
-
         this.coordinatePopUp = [lng, lat];
         this.form.longitude = lng.toFixed(6);
         this.form.latitude = lat.toFixed(6);
         this.showMarker = true;
-        // asyncActions.flyTo({
-        //   center: [30, 30],
-        //   zoom: 9,
-        //   speed: 1,
-        // });
-        // this.mapbox.flyTo({
-        //   center: [this.form.longitude, this.form.latitude],
-        //   essential: true,
-        // });
+        const asyncActions = this.mapEvent.component.actions;
+        await asyncActions.flyTo({
+          center: this.coordinatePopUp,
+          zoom: 15,
+          speed: 0.8,
+        });
       } else {
         this.showMarker = false;
       }
     },
+
     search(val) {
       if (val) {
         this.isLoading = true;
@@ -307,28 +299,40 @@ export default {
       console.log(this.form);
     },
 
-    onMapLoaded() {
+    onMapLoaded(e) {
+      this.mapEvent = e;
       this.loadingMap = false;
     },
 
-    setMarker(e) {
+    async setMarker(e) {
       const [lng, lat] = Object.values(e.mapboxEvent.lngLat.wrap());
       this.coordinatePopUp = [lng, lat];
       this.form.longitude = lng.toFixed(6);
       this.form.latitude = lat.toFixed(6);
       this.showMarker = true;
+      const asyncActions = e.component.actions;
+      await asyncActions.flyTo({
+        center: [lng, lat],
+        zoom: 15,
+        speed: 0.8,
+      });
     },
 
-    onChangeLngLat() {
+    async onChangeLngLat() {
       if (+this.form.latitude && +this.form.longitude && this.validForm) {
         this.coordinatePopUp = [+this.form.longitude, +this.form.latitude];
         this.showMarker = true;
-        return;
+        const asyncActions = this.mapEvent.component.actions;
+        await asyncActions.flyTo({
+          center: this.coordinatePopUp,
+          zoom: 15,
+          speed: 0.8,
+        });
       }
-      this.showMarker = false;
-    },
-    showRender(event) {
-      console.log(event);
+
+      if (!this.validForm) {
+        this.showMarker = false;
+      }
     },
   },
 };
