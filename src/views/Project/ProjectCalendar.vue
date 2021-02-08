@@ -6,7 +6,7 @@
         <v-icon right> mdi-calendar-month </v-icon>
       </v-chip>
       <v-spacer></v-spacer>
-      <v-btn color="primary" dark @click="dialog = true">
+      <v-btn color="primary" dark @click="showAssignDate">
         Crear
         <v-icon right> mdi-plus </v-icon>
       </v-btn>
@@ -37,7 +37,37 @@
         type="month"
         :events="getScheduled"
         :event-color="getEventColor"
+        @click:event="showProject"
       ></v-calendar>
+
+      <v-dialog v-model="show" max-width="650">
+        <v-card color="grey lighten-4">
+          <v-toolbar dark>
+            {{ visitInfo.project }}
+            <v-spacer></v-spacer>
+            <v-btn icon class="ml-5" @click="dialogDelete = true">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-card-text>
+            <v-chip class="my-3" :color="color" dark outlined label>
+              {{ stateVisit }}
+            </v-chip>
+            <p>
+              {{ visitInfo.description }}
+            </p>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text color="secondary" @click="show = false">
+              Cancelar
+            </v-btn>
+            <v-btn text color="green" @click="showEdit">
+              Editar
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-sheet>
 
     <!-- START MODAL CREATE -->
@@ -106,6 +136,71 @@
       </v-card>
     </v-dialog>
     <!-- END MODAL CREATE -->
+
+    <!-- START MODAL EDIT -->
+    <v-dialog v-model="dialogEdit" max-width="650">
+      <v-card>
+        <v-form @submit.prevent="editVisit">
+          <v-card-title> {{ visitInfo.project }} </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col>
+                <v-select
+                  v-model="visitInfo.idStatus"
+                  :items="visitStatuses"
+                  item-text="nombre"
+                  item-value="id"
+                  label="Estado de la visita"
+                ></v-select>
+
+                <v-textarea
+                  v-model="visitInfo.description"
+                  auto-grow
+                  label="Descripcion"
+                ></v-textarea>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="dialogEdit = false">Cancelar</v-btn>
+            <v-btn
+              color="blue darken-1"
+              text
+              type="submit"
+              @click="dialogEdit = false"
+            >
+              Guardar
+            </v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-dialog>
+    <!-- END MODAL EDIT -->
+    <!-- START MODAL DELETE -->
+    <v-dialog v-model="dialogDelete" max-width="450">
+      <v-card>
+        <v-card-title class="headline">
+          Eliminar Visita
+        </v-card-title>
+
+        <v-card-text>
+          ¿Seguro de eliminar la visita a {{ visitInfo.project }}?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="red darken-1" text @click="deleteVisit()">
+            Eliminar
+          </v-btn>
+          <v-btn  text @click="dialogDelete = false">
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- END MODAL DELETE -->
   </v-container>
 </template>
 
@@ -123,6 +218,9 @@ export default {
       idStatusFiltered: -1,
 
       dialog: false,
+      dialogEdit: false,
+      dialogDelete: false,
+      show: false,
 
       projects: [
         "Volcan de San Miguel",
@@ -131,7 +229,11 @@ export default {
         "Volcan de Santa Ana",
       ],
 
+      color: "",
+      stateVisit: "",
+
       visitInfo: {
+        id: null,
         project: "",
         idStatus: "",
         description: "",
@@ -171,6 +273,7 @@ export default {
 
       scheduledVisits: [
         {
+          id: 1,
           name: "Cerro el pital",
           start: "2021-02-01",
           end: "2021-02-03",
@@ -178,6 +281,7 @@ export default {
           materialColor: "indigo",
         },
         {
+          id: 2,
           name: "Cerro el pital",
           start: new Date("Feb 5, 2021 07:22:13"),
           end: new Date("Feb 8, 2021 07:22:13"),
@@ -185,6 +289,7 @@ export default {
           materialColor: "orange",
         },
         {
+          id: 3,
           name: "Cerro el pital",
           start: "2021-02-01",
           end: "2021-02-02",
@@ -210,19 +315,69 @@ export default {
     getEventColor(event) {
       return event.materialColor;
     },
+    showAssignDate() {
+      this.visitInfo = {};
+      this.dialog = true;
+    },
 
     assignDate() {
       //Esto cambiará a una petición solo quedará el objeto para guardarlo
       let [startDate, endDate] = this.visitInfo.dates;
       this.scheduledVisits.push({
+        id: this.scheduledVisits.length + 1,
         name: this.visitInfo.project,
         start: startDate,
         end: endDate || startDate,
-        id_status: this.scheduledVisits.length + 1,
+        id_status: this.visitInfo.idStatus,
         materialColor: this.visitStatuses.find(
           (element) => element.id === this.visitInfo.idStatus
         ).materialColor,
       });
+    },
+    showProject({ event }) {
+      this.visitInfo.id = event.id;
+      this.visitInfo.project = event.name;
+      this.visitInfo.description =
+        " Lorem ipsum dolor, sit amet consectetur adipisicing elit. Officiis accusantium necessitatibus non odio expedita dolor doloribus sint dicta at quidem, magni soluta labore? Itaque corrupti facere odit deleniti quasi. Nisi ";
+
+      this.visitInfo.idStatus = this.visitStatuses.find(
+        (element) => element.id === event.id_status
+      ).id;
+
+      this.stateVisit = this.visitStatuses.find(
+        (element) => element.id === event.id_status
+      ).nombre;
+      this.color = this.visitStatuses.find(
+        (element) => element.id === event.id_status
+      ).materialColor;
+
+      this.show = true;
+    },
+    editVisit() {
+      let indexVisit;
+      this.scheduledVisits.forEach((element, index) => {
+        if (element.id === this.visitInfo.id) {
+          indexVisit = index;
+        }
+      });
+      this.scheduledVisits[indexVisit].id_status = this.visitInfo.idStatus;
+      this.scheduledVisits[indexVisit].materialColor = this.visitStatuses.find(
+        (element) => element.id === this.visitInfo.idStatus
+      ).materialColor;
+      // this.scheduledVisits[indexVisit].description = this.visitInfo.description
+      this.visitInfo = {};
+    },
+    showEdit() {
+      this.dialogEdit = true;
+      this.show = false;
+    },
+    deleteVisit() {
+      this.scheduledVisits = this.scheduledVisits.filter(
+        (element) => element.id != this.visitInfo.id
+      );
+      this.show = false;
+      this.dialogDelete = false;
+      this.visitInfo = {};
     },
   },
 };
