@@ -185,8 +185,8 @@
 </template>
 
 <script>
-
 import MaterialColorPicker from "@/components/MaterialColorPicker";
+import axios from "axios";
 
 
 export default {
@@ -196,31 +196,11 @@ export default {
     MaterialColorPicker,
   },
 
-
   data() {
     return {
-      listClassification: [
-        {
-          id: 1,
-          nombre: "Fisica",
-          material_color: "blue",
-          visible: true,
-        },
-        {
-          id: 2,
-          nombre: "Geofisica",
-          material_color: "yellow",
-          visible: true,
-        },
-        {
-          id: 3,
-          nombre: "Geologia",
-          material_color: "pink",
-          visible: false,
-        },
-      ],
+      listClassification: [],
 
-formData: {
+      formData: {
         otroAtributo: true,
         colorSelected: "blue",
       },
@@ -243,7 +223,29 @@ formData: {
       attrs: {},
     };
   },
+  created() {
+    this.getClassification();
+  },
+
   methods: {
+    async getClassification() {
+      var self = this;
+      axios
+        .get("http://localhost:8000/geocimat/clasificacion/")
+        .then(function(response) {
+          // handle success
+          console.log(response.data.clasificaciones);
+          self.listClassification = response.data.clasificaciones;
+        })
+        .catch(function(error) {
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
+    },
+
     create() {
       this.settingdata();
       this.dialog = true;
@@ -253,7 +255,6 @@ formData: {
       this.showSnackbar("Clasificacion Actualizada", "success");
     },
     createClassification() {
-
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         this.listClassification.push({
           id: Date.now(),
@@ -267,7 +268,9 @@ formData: {
     },
     edit(index) {
       this.nombre = this.listClassification[index].nombre;
-      this.formData.colorSelected = this.listClassification[index].material_color;
+      this.formData.colorSelected = this.listClassification[
+        index
+      ].material_color;
       this.indexClassification = index;
       this.dialogEdit = true;
     },
@@ -291,8 +294,7 @@ formData: {
       this.nombre = "";
       this.indexClassification = null;
       this.idClassification = null;
-      this.formData.colorSelected = "blue"
-
+      this.formData.colorSelected = "blue";
     },
     validate(nombre, color) {
       if (color === null && nombre.length == 0) {

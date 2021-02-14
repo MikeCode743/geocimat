@@ -24,8 +24,8 @@
           <v-select
             v-model="form.clasification"
             :rules="rules.requiredSelectField"
-            :items="items"
-            item-text="value"
+            :items="clasifications"
+            item-text="nombre"
             item-value="id"
             label="Clasificación del proyecto"
             outlined
@@ -144,6 +144,8 @@ import "../../assets/mapbox-gl.css";
 import Mapbox from "mapbox-gl";
 import { MglMap, MglMarker, MglNavigationControl } from "vue-mapbox";
 
+import axios from "axios";
+
 const defaultForm = Object.freeze({
   projectName: "",
   clasification: "",
@@ -162,6 +164,7 @@ export default {
   },
 
   created() {
+    this.getClassification();
     this.mapbox = Mapbox;
   },
 
@@ -189,6 +192,8 @@ export default {
         { value: "Vue", id: 3 },
         { value: "Vuetify", id: 4 },
       ],
+
+      clasifications: [],
 
       snackbar: {
         visible: false,
@@ -281,6 +286,24 @@ export default {
   },
 
   methods: {
+    async getClassification() {
+      var self = this;
+      axios
+        .get("http://localhost:8000/geocimat/clasificacion/")
+        .then(function(response) {
+          // handle success
+          console.log(response.data.clasificaciones);
+          self.clasifications = response.data.clasificaciones;
+        })
+        .catch(function(error) {
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
+    },
+
     cleanForm() {
       this.$refs.form.resetValidation();
       this.form = { ...defaultForm };
@@ -297,6 +320,28 @@ export default {
         return;
       }
       console.log(this.form);
+
+      // const options = {
+      //   method: "post",
+      //   url: "http://localhost:8000/geocimat/proyecto/crear",
+      //   xsrfCookieName: "XSRF-TOKEN",
+      //   xsrfHeaderName: "X-XSRF-TOKEN",
+      //   data: {
+      //     firstName: "Finn",
+      //   },
+      // };
+
+      // axios(options);
+      axios
+        .post("http://localhost:8000/geocimat/proyecto/crear", {
+          
+        })
+        .then(function(response) {
+          console.log(response);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
     },
 
     onMapLoaded(e) {
