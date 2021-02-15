@@ -126,7 +126,7 @@
     <v-snackbar
       v-model="snackbar.visible"
       :timeout="3000"
-      color="red darken-1"
+      :color="snackbar.color"
       left
     >
       {{ snackbar.text }}
@@ -198,6 +198,7 @@ export default {
       snackbar: {
         visible: false,
         text: "",
+        color:"",
       },
 
       validForm: true,
@@ -310,37 +311,42 @@ export default {
       this.showMarker = false;
     },
 
-    submitForm() {
+    async submitForm() {
       const validForm = this.$refs.form.validate();
       if (!validForm) {
         this.snackbar = {
           visible: true,
           text: "Debe completar el formulario.",
+          color: "red"
         };
         return;
       }
       console.log(this.form);
-
-      // const options = {
-      //   method: "post",
-      //   url: "http://localhost:8000/geocimat/proyecto/crear",
-      //   xsrfCookieName: "XSRF-TOKEN",
-      //   xsrfHeaderName: "X-XSRF-TOKEN",
-      //   data: {
-      //     firstName: "Finn",
-      //   },
-      // };
-
-      // axios(options);
-      axios
+      var self = this
+      await axios
         .post("http://localhost:8000/geocimat/proyecto/crear", {
-          
+          nombre: self.form.projectName,
+          id_clasificacion: self.form.clasification,
+          longitud: self.form.longitude,
+          latitud: self.form.latitude,
+          descripcion:self.form.description
         })
         .then(function(response) {
           console.log(response);
+          self.cleanForm()
+          self.snackbar = {
+            visible: true,
+            text: response.data.message,
+            color:"blue"
+          }
         })
         .catch(function(error) {
           console.log(error);
+          self.cleanForm()
+          self.snackbar = {
+            visible: true,
+            text: response.data.message
+          }
         });
     },
 

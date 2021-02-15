@@ -188,7 +188,6 @@
 import MaterialColorPicker from "@/components/MaterialColorPicker";
 import axios from "axios";
 
-
 export default {
   name: "Classification",
 
@@ -221,6 +220,8 @@ export default {
       /* Tooltip */
       on: true,
       attrs: {},
+
+      location: location.host,
     };
   },
   created() {
@@ -234,7 +235,6 @@ export default {
         .get("http://localhost:8000/geocimat/clasificacion/")
         .then(function(response) {
           // handle success
-          console.log(response.data.clasificaciones);
           self.listClassification = response.data.clasificaciones;
         })
         .catch(function(error) {
@@ -250,19 +250,55 @@ export default {
       this.settingdata();
       this.dialog = true;
     },
-    changeState(valor, index) {
-      this.listClassification[index].visible = valor;
-      this.showSnackbar("Clasificacion Actualizada", "success");
-    },
-    createClassification() {
-      if (this.validate(this.nombre, this.formData.colorSelected)) {
-        this.listClassification.push({
-          id: Date.now(),
-          nombre: this.nombre,
-          material_color: this.formData.colorSelected,
-          visible: true,
+    async changeState(valor, index) {
+      this.idClassification = this.listClassification[index].id;
+      var self = this;
+      await axios
+        .post("http://localhost:8000/geocimat/clasificacion/visible", {
+          id: self.idClassification,
+          visible: valor,
+        })
+        .then(function(response) {
+          self.showSnackbar(response.data.message, "primary");
+          // handle success
+        })
+        .catch(function(error) {
+          // handle error
+          self.listClassification[index].visible = !valor;
+          console.log(error);
+          self.showSnackbar("Ocurrio un error", "red");
+        })
+        .then(function() {
+          // always executed
         });
-        this.showSnackbar("Clasificación Agregado", "primary");
+    },
+    async createClassification() {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
+        var self = this;
+        await axios
+          .post("http://localhost:8000/geocimat/clasificacion/crear", {
+            nombre: self.nombre,
+            material_color: self.formData.colorSelected,
+            visible: true,
+          })
+          .then(function(response) {
+            self.showSnackbar("Clasificación Agregado", "primary");
+            // handle success
+            self.listClassification.push({
+              id: response.data.clasificacion.id,
+              nombre: response.data.clasificacion.nombre,
+              material_color: response.data.clasificacion.material_color,
+              visible: response.data.clasificacion.visible,
+            });
+          })
+          .catch(function(error) {
+            // handle error
+            console.log(error);
+            self.showSnackbar("Ocurrio un error", "red");
+          })
+          .then(function() {
+            // always executed
+          });
       }
       this.settingdata();
     },
@@ -272,16 +308,35 @@ export default {
         index
       ].material_color;
       this.indexClassification = index;
+      this.idClassification = this.listClassification[index].id;
       this.dialogEdit = true;
     },
-    editClassification() {
+    async editClassification() {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
-        this.listClassification[this.indexClassification].nombre = this.nombre;
-        this.listClassification[
-          this.indexClassification
-        ].material_color = this.formData.colorSelected;
-        this.showSnackbar("Clasificacion Editado", "success");
-        this.settingdata();
+        var self = this;
+        await axios
+          .post("http://localhost:8000/geocimat/clasificacion/modificar", {
+            id: self.idClassification,
+            nombre: self.nombre,
+            material_color: self.formData.colorSelected,
+          })
+          .then(function(response) {
+            self.showSnackbar(response.data.message, "primary");
+            self.listClassification[self.indexClassification].nombre =
+              self.nombre;
+            self.listClassification[self.indexClassification].material_color =
+              self.formData.colorSelected;
+
+            // handle success
+          })
+          .catch(function(error) {
+            // handle error
+            console.log(error);
+            self.showSnackbar("Ocurrio un error", "red");
+          })
+          .then(function() {
+            // always executed
+          });
       }
     },
 

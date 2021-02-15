@@ -14,15 +14,14 @@
 
     <v-row class="mt-0 mb-3">
       <v-chip-group mandatory>
-        <v-chip color="secondary" @click="idStatusFiltered = -1" dark outlined>
+        <v-chip color="secondary" @click="idStatusFiltered = -1" dark>
           Mostrar Todos
         </v-chip>
         <v-chip
           v-for="statuses in visitStatuses"
           :key="statuses.id"
-          :color="statuses.materialColor"
+          :color="statuses.material_color"
           @click="idStatusFiltered = statuses.id"
-          outlined
           dark
         >
           {{ statuses.nombre }}
@@ -41,7 +40,7 @@
           {{ $refs.calendar.title }}
         </v-toolbar-title>
         <v-toolbar-title v-if="!$refs.calendar">
-        {{ mes }}
+          {{ mes }}
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
@@ -61,7 +60,7 @@
         @click:event="showProject"
         @change="changeDate"
       ></v-calendar>
-
+      <!-- Modal details -->
       <v-dialog v-model="show" max-width="650">
         <v-card color="grey lighten-4">
           <v-toolbar dark>
@@ -72,8 +71,11 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            <v-chip class="my-3" :color="color" dark outlined label>
-              {{ stateVisit }}
+            <v-chip class="my-3 mr-3" :color="color2" dark label>
+              {{ visitInfo.classification }}
+            </v-chip>
+            <v-chip class="my-3" :color="color" dark label>
+              {{ visitInfo.stateVisit }}
             </v-chip>
             <p>
               {{ visitInfo.description }}
@@ -105,6 +107,8 @@
                   clearable
                   v-model="visitInfo.project"
                   :items="projects"
+                  item-text="nombre"
+                  item-value="identificador"
                   label="Proyecto "
                 ></v-autocomplete>
 
@@ -223,10 +227,25 @@
       </v-card>
     </v-dialog>
     <!-- END MODAL DELETE -->
+    <!-- START SNACKBAR -->
+    <v-snackbar
+      v-model="snackbar.state"
+      :timeout="3000"
+      :color="snackbar.color"
+      left
+    >
+      {{ snackbar.message }}
+      <v-btn text v-bind="attrs" @click="snackbar.state = false">
+        Cerrar
+      </v-btn>
+    </v-snackbar>
+    <!-- END SNACBAR -->
   </v-container>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "ProjectCalendar",
 
@@ -234,6 +253,7 @@ export default {
 
   created() {
     this.mes = "febrero 2021";
+    this.getDates();
   },
   mounted() {},
 
@@ -255,6 +275,7 @@ export default {
       ],
 
       color: "",
+      color2: "",
       stateVisit: "",
       focus: "",
 
@@ -264,6 +285,8 @@ export default {
         idStatus: "",
         description: "",
         dates: [],
+        classification: "",
+        stateVisit: "",
       },
 
       colors: [
@@ -275,54 +298,17 @@ export default {
         "orange",
         "grey darken-1",
       ],
+      /* Snackbar */
+      snackbar: {
+        state: false,
+        message: "",
+        color: "",
+      },
+      attrs: {},
 
-      visitStatuses: [
-        {
-          id: 1,
-          nombre: "A Visitar",
-          materialColor: "indigo",
-          visible: true,
-        },
-        {
-          id: 2,
-          nombre: "Cancelado",
-          materialColor: "orange",
-          visible: false,
-        },
-        {
-          id: 3,
-          nombre: "Pendiente de aprobación",
-          materialColor: "green darken-1",
-          visible: true,
-        },
-      ],
+      visitStatuses: [],
 
-      scheduledVisits: [
-        {
-          id: 1,
-          name: "Cerro el pital",
-          start: "2021-02-01",
-          end: "2021-02-03",
-          id_status: 1,
-          materialColor: "indigo",
-        },
-        {
-          id: 2,
-          name: "Cerro el pital",
-          start: new Date("Feb 5, 2021 07:22:13"),
-          end: new Date("Feb 8, 2021 07:22:13"),
-          id_status: 2,
-          materialColor: "orange",
-        },
-        {
-          id: 3,
-          name: "Cerro el pital",
-          start: "2021-02-01",
-          end: "2021-02-02",
-          id_status: 3,
-          materialColor: "green",
-        },
-      ],
+      scheduledVisits: [],
     };
   },
 
@@ -346,64 +332,154 @@ export default {
       this.dialog = true;
     },
 
-    assignDate() {
+    async getDates() {
+      var self = this;
+      await axios
+        .get("http://localhost:8000/geocimat/calendario/")
+        .then(function(response) {
+          self.scheduledVisits = response.data.calendario;
+          self.visitStatuses = response.data.estadoVisita;
+          self.projects = response.data.proyectos;
+        })
+        .catch(function(error) {
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
+    },
+
+    async assignDate() {
       //Esto cambiará a una petición solo quedará el objeto para guardarlo
       let [startDate, endDate] = this.visitInfo.dates;
-      this.scheduledVisits.push({
-        id: this.scheduledVisits.length + 1,
-        name: this.visitInfo.project,
-        start: startDate,
-        end: endDate || startDate,
-        id_status: this.visitInfo.idStatus,
-        materialColor: this.visitStatuses.find(
-          (element) => element.id === this.visitInfo.idStatus
-        ).materialColor,
-      });
+
+      var self = this;
+      let eventAdd = false;
+      let newId = null;
+      await axios
+        .post("http://localhost:8000/geocimat/calendario/crear", {
+          identificador: self.visitInfo.project,
+          id_estado: self.visitInfo.idStatus,
+          fecha_inicio: startDate,
+          fecha_fin: endDate || startDate,
+          descripcion: self.visitInfo.description,
+        })
+        .then(function(response) {
+          // handle success
+          self.showSnackbar(response.data.message, "primary");
+          newId = response.data.newDate;
+        })
+        .catch(function(error) {
+          self.showSnackbar("ocurrio un error", "red");
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
+
+      if (eventAdd) {
+        this.scheduledVisits.push({
+          id: newId,
+          name: this.visitInfo.project,
+          start: startDate,
+          end: endDate || startDate,
+          id_status: this.visitInfo.idStatus,
+          materialColor: this.visitStatuses.find(
+            (element) => element.id === this.visitInfo.idStatus
+          ).materialColor,
+        });
+      }
     },
     showProject({ event }) {
       this.visitInfo.id = event.id;
       this.visitInfo.project = event.name;
-      this.visitInfo.description =
-        " Lorem ipsum dolor, sit amet consectetur adipisicing elit. Officiis accusantium necessitatibus non odio expedita dolor doloribus sint dicta at quidem, magni soluta labore? Itaque corrupti facere odit deleniti quasi. Nisi ";
-
-      this.visitInfo.idStatus = this.visitStatuses.find(
-        (element) => element.id === event.id_status
-      ).id;
-
-      this.stateVisit = this.visitStatuses.find(
+      if (event.descripcion !== null) {
+        this.visitInfo.description = event.descripcion;
+      } else {
+        this.visitInfo.description = "¡Sin descripcion!";
+      }
+      this.visitInfo.idStatus = event.id_status;
+      this.visitInfo.stateVisit = this.visitStatuses.find(
         (element) => element.id === event.id_status
       ).nombre;
       this.color = this.visitStatuses.find(
         (element) => element.id === event.id_status
-      ).materialColor;
-
+      ).material_color;
+      this.color2 = event.cla_material_color;
       this.show = true;
+
+      this.visitInfo.classification = event.clasificacion;
     },
-    editVisit() {
-      let indexVisit;
-      this.scheduledVisits.forEach((element, index) => {
-        if (element.id === this.visitInfo.id) {
-          indexVisit = index;
-        }
-      });
-      this.scheduledVisits[indexVisit].id_status = this.visitInfo.idStatus;
-      this.scheduledVisits[indexVisit].materialColor = this.visitStatuses.find(
-        (element) => element.id === this.visitInfo.idStatus
-      ).materialColor;
-      // this.scheduledVisits[indexVisit].description = this.visitInfo.description
-      this.visitInfo = {};
+    async editVisit() {
+      let visit = false;
+      let indexVisit = null;
+      var self = this;
+      await axios
+        .post("http://localhost:8000/geocimat/calendario/modificar", {
+          id: self.visitInfo.id,
+          id_estado: self.visitInfo.idStatus,
+          descripcion: self.visitInfo.description,
+        })
+        .then(function(response) {
+          self.showSnackbar(response.data.message, "primary");
+          visit = true;
+        })
+        .catch(function(error) {
+          self.showSnackbar("ocurrio un error", "red");
+          console.log(error);
+        });
+
+      if (visit) {
+        this.scheduledVisits.forEach((element, index) => {
+          if (element.id === this.visitInfo.id) {
+            indexVisit = index;
+          }
+        });
+        this.scheduledVisits[indexVisit].id_status = this.visitInfo.idStatus;
+        this.scheduledVisits[
+          indexVisit
+        ].materialColor = this.visitStatuses.find(
+          (element) => element.id === this.visitInfo.idStatus
+        ).material_color;
+        this.scheduledVisits[
+          indexVisit
+        ].descripcion = this.visitInfo.description;
+        this.visitInfo = {};
+      }
     },
     showEdit() {
       this.dialogEdit = true;
       this.show = false;
     },
-    deleteVisit() {
-      this.scheduledVisits = this.scheduledVisits.filter(
-        (element) => element.id != this.visitInfo.id
-      );
-      this.show = false;
-      this.dialogDelete = false;
-      this.visitInfo = {};
+    async deleteVisit() {
+      var self = this;
+      let eventDelete = false;
+      await axios
+        .post("http://localhost:8000/geocimat/calendario/destruir", {
+          id: self.visitInfo.id,
+        })
+        .then(function(response) {
+          self.showSnackbar(response.data.message, "secondary");
+          // handle success
+          eventDelete = true;
+        })
+        .catch(function(error) {
+          self.showSnackbar("ocurrio un error", "red");
+          // handle error
+          console.log(error);
+        })
+        .then(function() {});
+
+      if (eventDelete) {
+        self.scheduledVisits = self.scheduledVisits.filter(
+          (element) => element.id != self.visitInfo.id
+        );
+        this.show = false;
+        this.dialogDelete = false;
+        this.visitInfo = {};
+      }
     },
     prev() {
       this.$refs.calendar.prev();
@@ -416,6 +492,11 @@ export default {
     changeDate() {
       this.$refs.calendar.checkChange();
       this.mes = "";
+    },
+    showSnackbar(message, color) {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.state = true;
     },
   },
 };
