@@ -185,6 +185,8 @@
 
 <script>
 import MaterialColorPicker from "@/components/MaterialColorPicker";
+import axios from "axios";
+
 
 export default {
   name: "VisitingState",
@@ -195,32 +197,7 @@ export default {
 
   data() {
     return {
-      listState: [
-        {
-          id: 1,
-          nombre: "Visita Posterior",
-          material_color: "blue",
-          visible: true,
-        },
-        {
-          id: 2,
-          nombre: "Visita Previa",
-          material_color: "yellow",
-          visible: true,
-        },
-        {
-          id: 3,
-          nombre: "Cancelado",
-          material_color: "pink",
-          visible: false,
-        },
-        {
-          id: 4,
-          nombre: "Terminado",
-          material_color: "success",
-          visible: true,
-        },
-      ],
+      listState: [],
       formData: {
         otroAtributo: true,
         colorSelected: "blue",
@@ -244,25 +221,79 @@ export default {
       attrs: {},
     };
   },
+  created() {
+    this.getState();
+  },
   methods: {
+    async getState() {
+      var self = this;
+      axios
+        .get("http://localhost:8000/geocimat/estadovisita/")
+        .then(function(response) {
+          // handle success
+          console.log(response.data)
+          self.listState = response.data.estadovisita;
+        })
+        .catch(function(error) {
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
+    },
     create() {
       this.settingdata();
       this.dialog = true;
     },
-    changeState(valor, index) {
-      this.listState[index].visible = valor;
-      this.showSnackbar("Estado Actualizada", "success");
-    },
-    createState() {
+    async changeState(valor, index) {
+      this.idState = this.listState[index].id;
 
-      if (this.validate(this.nombre, this.formData.colorSelected)) {
-        this.listState.push({
-          id: Date.now(),
-          nombre: this.nombre,
-          material_color: this.formData.colorSelected,
-          visible: true,
+      var self = this;
+      await axios
+        .post("http://localhost:8000/geocimat/estadovisita/visible", {
+          id: self.idState,
+          visible: valor,
+        })
+        .then(function(response) {
+          self.showSnackbar(response.data.message, "primary");
+          // handle success
+        })
+        .catch(function(error) {
+          // handle error
+          self.listState[index].visible = !valor;
+          console.log(error);
+          self.showSnackbar("Ocurrio un error", "red");
+        })
+        .then(function() {
+          // always executed
         });
-        this.showSnackbar("Estado Agregado", "primary");
+    },
+    async createState() {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
+        var self = this;
+        await axios
+          .post("http://localhost:8000/geocimat/clasificacion/crear", {
+            nombre: self.nombre,
+            material_color: self.formData.colorSelected,
+            visible: true,
+          })
+          .then(function(response) {
+            self.showSnackbar(response.data.message, "primary");
+            this.listState.push({
+              id: response.data.estadovisita.id,
+              nombre: response.data.estadovisita.nombre,
+              material_color: response.data.estadovisita.material_color,
+              visible: response.data.estadovisita.visible,
+            });
+          })
+          .catch(function(error) {
+            console.log(error);
+            self.showSnackbar("Ocurrio un error", "red");
+          })
+          .then(function() {
+            // always executed
+          });
       }
       this.settingdata();
     },
@@ -272,11 +303,32 @@ export default {
       this.indexState = index;
       this.dialogEdit = true;
     },
-    editState() {
+    async editState() {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
-        this.listState[this.indexState].nombre = this.nombre;
-        this.listState[this.indexState].material_color = this.formData.colorSelected;
-        this.showSnackbar("Estado Editado", "success");
+        var self = this;
+        await axios
+          .post("http://localhost:8000/geocimat/clasificacion/modificar", {
+            id: self.idState,
+            nombre: self.nombre,
+            material_color: self.formData.colorSelected,
+          })
+          .then(function(response) {
+            self.showSnackbar(response.data.message, "primary");
+
+            self.listState[self.indexState].nombre = self.nombre;
+            self.listState[self.indexState].material_color =
+              self.formData.colorSelected;
+
+          })
+          .catch(function(error) {
+            // handle error
+            console.log(error);
+            self.showSnackbar("Ocurrio un error", "red");
+          })
+          .then(function() {
+            // always executed
+          });
+
         this.settingdata();
       }
     },
@@ -290,7 +342,7 @@ export default {
       this.nombre = "";
       this.indexClassification = null;
       this.idClassification = null;
-      this.formData.colorSelected = "blue"
+      this.formData.colorSelected = "blue";
     },
     validate(nombre, color) {
       if (color === null && nombre.length == 0) {

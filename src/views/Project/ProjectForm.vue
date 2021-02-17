@@ -24,8 +24,8 @@
           <v-select
             v-model="form.clasification"
             :rules="rules.requiredSelectField"
-            :items="items"
-            item-text="value"
+            :items="clasifications"
+            item-text="nombre"
             item-value="id"
             label="Clasificación del proyecto"
             outlined
@@ -126,7 +126,7 @@
     <v-snackbar
       v-model="snackbar.visible"
       :timeout="3000"
-      color="red darken-1"
+      :color="snackbar.color"
       left
     >
       {{ snackbar.text }}
@@ -143,6 +143,8 @@
 import "../../assets/mapbox-gl.css";
 import Mapbox from "mapbox-gl";
 import { MglMap, MglMarker, MglNavigationControl } from "vue-mapbox";
+
+import axios from "axios";
 
 const defaultForm = Object.freeze({
   projectName: "",
@@ -162,6 +164,7 @@ export default {
   },
 
   created() {
+    this.getClassification();
     this.mapbox = Mapbox;
   },
 
@@ -190,9 +193,12 @@ export default {
         { value: "Vuetify", id: 4 },
       ],
 
+      clasifications: [],
+
       snackbar: {
         visible: false,
         text: "",
+        color:"",
       },
 
       validForm: true,
@@ -281,22 +287,67 @@ export default {
   },
 
   methods: {
+    async getClassification() {
+      var self = this;
+      axios
+        .get("http://localhost:8000/geocimat/clasificacion/")
+        .then(function(response) {
+          // handle success
+          console.log(response.data.clasificaciones);
+          self.clasifications = response.data.clasificaciones;
+        })
+        .catch(function(error) {
+          // handle error
+          console.log(error);
+        })
+        .then(function() {
+          // always executed
+        });
+    },
+
     cleanForm() {
       this.$refs.form.resetValidation();
       this.form = { ...defaultForm };
       this.showMarker = false;
     },
 
-    submitForm() {
+    async submitForm() {
       const validForm = this.$refs.form.validate();
       if (!validForm) {
         this.snackbar = {
           visible: true,
           text: "Debe completar el formulario.",
+          color: "red"
         };
         return;
       }
       console.log(this.form);
+      var self = this
+      await axios
+        .post("http://localhost:8000/geocimat/proyecto/crear", {
+          nombre: self.form.projectName,
+          id_clasificacion: self.form.clasification,
+          longitud: self.form.longitude,
+          latitud: self.form.latitude,
+          descripcion:self.form.description
+        })
+        .then(function(response) {
+          console.log(response);
+          self.cleanForm()
+          self.snackbar = {
+            visible: true,
+            text: response.data.message,
+            color:"blue"
+          }
+        })
+        .catch(function(error) {
+          console.log(error);
+          self.cleanForm()
+          self.snackbar = {
+            visible: true,
+            text: response.data.message
+          }
+        });
     },
 
     onMapLoaded(e) {
