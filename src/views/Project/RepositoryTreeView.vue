@@ -87,7 +87,7 @@
       v-model="tree"
       :open="initiallyOpen"
       :items="items"
-      item-key="path"
+      item-key="id"
       activatable
     >
       <template v-slot:prepend="{ item, open }">

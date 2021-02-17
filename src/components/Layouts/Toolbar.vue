@@ -119,8 +119,7 @@ export default {
 
       // host: location.host,
       // host: "http://localhost:8000",
-      host:"https://geocimat.herokuapp.com",
-
+      host: "https://geocimat.herokuapp.com",
     };
   },
   created() {
@@ -128,20 +127,20 @@ export default {
   },
   methods: {
     async getProjects() {
-      var self = this;
-      await axios
-        .get(`${this.host}/geocimat/proyecto`)
-        .then(function(response) {
-          self.listOfProjects = response.data.proyecto;
-        })
-        .catch(function (error) {
-          // handle error
-          console.log(error);
-        })
-        .then(function () {
-          // always executed
-        });
-      console.log(this.getProjects);
+      // var self = this;
+      // await axios
+      //   .get(`${this.host}/geocimat/proyecto`)
+      //   .then(function(response) {
+      //     self.listOfProjects = response.data.proyecto;
+      //   })
+      //   .catch(function (error) {
+      //     // handle error
+      //     console.log(error);
+      //   })
+      //   .then(function () {
+      //     // always executed
+      //   });
+      // console.log(this.getProjects);
     },
   },
 };
