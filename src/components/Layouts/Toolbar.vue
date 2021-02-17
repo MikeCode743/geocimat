@@ -57,7 +57,10 @@
               link
               v-for="project in listOfProjects"
               :key="project.id"
-              :to="{ name: 'ProjectDetail', params: { id: project.identificador } }"
+              :to="{
+                name: 'ProjectDetail',
+                params: { id: project.identificador },
+              }"
             >
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
@@ -102,15 +105,7 @@ export default {
   name: "Toolbar",
   data() {
     return {
-<<<<<<< HEAD
-      listOfProjects: [
-        { id: 1, name: "proyecto-a1" },
-        { id: 2, name: "Lorem Lorem" },
-        { id: 3, name: "Praesentium accusantium" },
-      ],
-=======
       listOfProjects: [],
->>>>>>> 0e22995c894f31ba129409def1bf431c4bd41f45
       listAdmin: [
         { id: 2, name: "Clasificacion", path: "ManagmentClassification" },
         { id: 3, name: "Permisos", path: "ManagmentPermits" },
@@ -123,25 +118,25 @@ export default {
       attrs: {},
     };
   },
-  created(){
-    this.getProjects()
+  created() {
+    this.getProjects();
   },
   methods: {
     async getProjects() {
       var self = this;
       await axios
         .get("http://localhost:8000/geocimat/proyecto")
-        .then(function(response) {
+        .then(function (response) {
           self.listOfProjects = response.data.proyecto;
         })
-        .catch(function(error) {
+        .catch(function (error) {
           // handle error
           console.log(error);
         })
-        .then(function() {
+        .then(function () {
           // always executed
         });
-        console.log(this.getProjects);
+      console.log(this.getProjects);
     },
   },
 };
