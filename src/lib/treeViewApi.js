@@ -48,11 +48,6 @@ function uploadElement(formData) {
         headers: {
           'content-type': 'multipart/form-data',
         },
-        onUploadProgress: function(progressEvent) {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          value = percentCompleted;
-          console.log(percentCompleted);
-        },
       })
       .then((response) => {
         resolve(response.data.mensaje);
