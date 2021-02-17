@@ -135,7 +135,7 @@
 
     <v-row class="mx-auto" v-if="tab === 3">
       <v-col>
-        <RepositoryTreeView />
+        <RepositoryTreeView v-bind:showAlert="showAlert" />
       </v-col>
     </v-row>
 
@@ -158,14 +158,14 @@
     </v-dialog>
 
     <v-snackbar
-      v-model="snackbar.visible"
+      v-model="snackbar.show"
       :timeout="4000"
       :color="snackbar.color"
       left
     >
       {{ snackbar.text }}
       <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="snackbar.visible = false">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false">
           Cerrar
         </v-btn>
       </template>
@@ -194,7 +194,7 @@ export default {
     return {
       files: [],
       snackbar: {
-        visible: false,
+        show: false,
         text: "",
         color: "",
       },
@@ -278,6 +278,10 @@ export default {
       fetchFiles().then((files) => (this.fileList = files));
     },
 
+    showAlert(data) {
+      this.snackbar = { ...data };
+    },
+
     fileUpload() {
       if (this.files.length) {
         let formData = new FormData();
@@ -290,7 +294,7 @@ export default {
         }).then((response) => {
           if (response.ok) {
             this.snackbar = {
-              visible: true,
+              show: true,
               text: `Se ha subido ${this.files.length} elemento.`,
               color: "",
             };
@@ -325,14 +329,14 @@ export default {
       }).then((response) => {
         if (response.ok) {
           this.snackbar = {
-            visible: true,
+            show: true,
             text: "Elemento eliminado.",
             color: "",
           };
           fetchFiles().then((files) => (this.fileList = files));
         } else {
           this.snackbar = {
-            visible: true,
+            show: true,
             text: "Ocurrio un error inesperado!",
             color: "red darken-1",
           };

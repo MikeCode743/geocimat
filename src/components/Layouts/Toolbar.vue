@@ -57,7 +57,10 @@
               link
               v-for="project in listOfProjects"
               :key="project.id"
-              :to="{ name: 'ProjectDetail', params: { id: project.identificador } }"
+              :to="{
+                name: 'ProjectDetail',
+                params: { id: project.identificador },
+              }"
             >
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
@@ -120,8 +123,8 @@ export default {
 
     };
   },
-  created(){
-    this.getProjects()
+  created() {
+    this.getProjects();
   },
   methods: {
     async getProjects() {
@@ -131,14 +134,14 @@ export default {
         .then(function(response) {
           self.listOfProjects = response.data.proyecto;
         })
-        .catch(function(error) {
+        .catch(function (error) {
           // handle error
           console.log(error);
         })
-        .then(function() {
+        .then(function () {
           // always executed
         });
-        console.log(this.getProjects);
+      console.log(this.getProjects);
     },
   },
 };
