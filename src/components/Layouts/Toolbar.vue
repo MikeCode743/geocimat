@@ -102,8 +102,9 @@ export default {
   data() {
     return {
       listOfProjects: [
-        { id: 1, name: "Lorem Lorem" },
-        { id: 2, name: "Praesentium accusantium" },
+        { id: 1, name: "proyecto-a1" },
+        { id: 2, name: "Lorem Lorem" },
+        { id: 3, name: "Praesentium accusantium" },
       ],
       listAdmin: [
         { id: 1, name: "Categoria", path: "ManagmentCategory" },
