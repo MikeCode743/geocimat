@@ -187,7 +187,6 @@
 import MaterialColorPicker from "@/components/MaterialColorPicker";
 import axios from "axios";
 
-
 export default {
   name: "VisitingState",
 
@@ -219,6 +218,10 @@ export default {
       /* Tooltip */
       on: true,
       attrs: {},
+
+      host:"https://geocimat.herokuapp.com",
+      // host:"http://localhost:8000"
+      // host: location.host
     };
   },
   created() {
@@ -228,10 +231,10 @@ export default {
     async getState() {
       var self = this;
       axios
-        .get("http://localhost:8000/geocimat/estadovisita/")
+        .get(`${this.host}/geocimat/estadovisita/`)
         .then(function(response) {
           // handle success
-          console.log(response.data)
+          console.log(response.data);
           self.listState = response.data.estadovisita;
         })
         .catch(function(error) {
@@ -251,7 +254,7 @@ export default {
 
       var self = this;
       await axios
-        .post("http://localhost:8000/geocimat/estadovisita/visible", {
+        .post(`${this.host}/geocimat/estadovisita/visible`, {
           id: self.idState,
           visible: valor,
         })
@@ -273,14 +276,15 @@ export default {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         var self = this;
         await axios
-          .post("http://localhost:8000/geocimat/clasificacion/crear", {
+          .post(`${this.host}/geocimat/estadovisita/crear`, {
             nombre: self.nombre,
             material_color: self.formData.colorSelected,
             visible: true,
           })
           .then(function(response) {
             self.showSnackbar(response.data.message, "primary");
-            this.listState.push({
+
+            self.listState.push({
               id: response.data.estadovisita.id,
               nombre: response.data.estadovisita.nombre,
               material_color: response.data.estadovisita.material_color,
@@ -306,19 +310,16 @@ export default {
     async editState() {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         var self = this;
+        let update = false;
         await axios
-          .post("http://localhost:8000/geocimat/clasificacion/modificar", {
+          .post(`${this.host}/geocimat/estadovisita/modificar`, {
             id: self.idState,
             nombre: self.nombre,
             material_color: self.formData.colorSelected,
           })
           .then(function(response) {
             self.showSnackbar(response.data.message, "primary");
-
-            self.listState[self.indexState].nombre = self.nombre;
-            self.listState[self.indexState].material_color =
-              self.formData.colorSelected;
-
+            update = true;
           })
           .catch(function(error) {
             // handle error
@@ -327,6 +328,11 @@ export default {
           })
           .then(function() {
             // always executed
+            if (update = true) {
+              self.listState[self.indexState].nombre = self.nombre;
+              self.listState[self.indexState].material_color =
+                self.formData.colorSelected;
+            }
           });
 
         this.settingdata();

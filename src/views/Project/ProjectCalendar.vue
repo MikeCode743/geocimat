@@ -309,6 +309,11 @@ export default {
       visitStatuses: [],
 
       scheduledVisits: [],
+
+      // host: location.host,
+      // host: "http://localhost:8000",
+      host:"https://geocimat.herokuapp.com",
+
     };
   },
 
@@ -335,7 +340,7 @@ export default {
     async getDates() {
       var self = this;
       await axios
-        .get("http://localhost:8000/geocimat/calendario/")
+        .get(`${this.host}/geocimat/calendario/`)
         .then(function(response) {
           self.scheduledVisits = response.data.calendario;
           self.visitStatuses = response.data.estadoVisita;
@@ -358,7 +363,7 @@ export default {
       let eventAdd = false;
       let newId = null;
       await axios
-        .post("http://localhost:8000/geocimat/calendario/crear", {
+        .post(`${this.host}/geocimat/calendario/crear`, {
           identificador: self.visitInfo.project,
           id_estado: self.visitInfo.idStatus,
           fecha_inicio: startDate,
@@ -369,6 +374,7 @@ export default {
           // handle success
           self.showSnackbar(response.data.message, "primary");
           newId = response.data.newDate;
+          eventAdd = true;
         })
         .catch(function(error) {
           self.showSnackbar("ocurrio un error", "red");
@@ -388,7 +394,7 @@ export default {
           id_status: this.visitInfo.idStatus,
           materialColor: this.visitStatuses.find(
             (element) => element.id === this.visitInfo.idStatus
-          ).materialColor,
+          ).material_color,
         });
       }
     },
@@ -417,7 +423,7 @@ export default {
       let indexVisit = null;
       var self = this;
       await axios
-        .post("http://localhost:8000/geocimat/calendario/modificar", {
+        .post(`${this.host}/geocimat/calendario/modificar`, {
           id: self.visitInfo.id,
           id_estado: self.visitInfo.idStatus,
           descripcion: self.visitInfo.description,
@@ -457,7 +463,7 @@ export default {
       var self = this;
       let eventDelete = false;
       await axios
-        .post("http://localhost:8000/geocimat/calendario/destruir", {
+        .post(`${this.host}/geocimat/calendario/destruir`, {
           id: self.visitInfo.id,
         })
         .then(function(response) {

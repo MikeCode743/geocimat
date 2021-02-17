@@ -107,7 +107,7 @@
             :rules="rules.textAreaField"
             v-model="form.description"
             label="Descripción del proyecto"
-            rows="2"
+            rows="5"
             value=""
             counter
             maxlength="25"
@@ -198,12 +198,15 @@ export default {
       snackbar: {
         visible: false,
         text: "",
-        color:"",
+        color: "",
       },
 
       validForm: true,
 
       form: { ...defaultForm },
+
+      // host: location.host,
+      host: "https://geocimat.herokuapp.com",
 
       rules: {
         requiredInputField: [
@@ -290,7 +293,7 @@ export default {
     async getClassification() {
       var self = this;
       axios
-        .get("http://localhost:8000/geocimat/clasificacion/")
+        .get(`${this.host}/geocimat/clasificacion/`)
         .then(function(response) {
           // handle success
           console.log(response.data.clasificaciones);
@@ -317,36 +320,36 @@ export default {
         this.snackbar = {
           visible: true,
           text: "Debe completar el formulario.",
-          color: "red"
+          color: "red",
         };
         return;
       }
       console.log(this.form);
-      var self = this
+      var self = this;
       await axios
-        .post("http://localhost:8000/geocimat/proyecto/crear", {
+        .post(`${this.host}/geocimat/proyecto/crear`, {
           nombre: self.form.projectName,
           id_clasificacion: self.form.clasification,
           longitud: self.form.longitude,
           latitud: self.form.latitude,
-          descripcion:self.form.description
+          descripcion: self.form.description,
         })
         .then(function(response) {
           console.log(response);
-          self.cleanForm()
+          self.cleanForm();
           self.snackbar = {
             visible: true,
             text: response.data.message,
-            color:"blue"
-          }
+            color: "blue",
+          };
         })
         .catch(function(error) {
           console.log(error);
-          self.cleanForm()
+          self.cleanForm();
           self.snackbar = {
             visible: true,
-            text: response.data.message
-          }
+            text: response.data.message,
+          };
         });
     },
 
