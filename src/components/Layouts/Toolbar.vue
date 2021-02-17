@@ -116,6 +116,11 @@ export default {
       /* Tooltip */
       on: true,
       attrs: {},
+
+      // host: location.host,
+      // host: "http://localhost:8000",
+      host:"https://geocimat.herokuapp.com",
+
     };
   },
   created() {
@@ -125,8 +130,8 @@ export default {
     async getProjects() {
       var self = this;
       await axios
-        .get("http://localhost:8000/geocimat/proyecto")
-        .then(function (response) {
+        .get(`${this.host}/geocimat/proyecto`)
+        .then(function(response) {
           self.listOfProjects = response.data.proyecto;
         })
         .catch(function (error) {

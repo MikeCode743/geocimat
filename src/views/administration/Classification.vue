@@ -222,6 +222,10 @@ export default {
       attrs: {},
 
       location: location.host,
+
+      // host: location.host,
+      host:"https://geocimat.herokuapp.com",
+      // host: "http://localhost:8000",
     };
   },
   created() {
@@ -231,10 +235,11 @@ export default {
   methods: {
     async getClassification() {
       var self = this;
-      axios
-        .get("http://localhost:8000/geocimat/clasificacion/")
+      await axios
+        .get(`${this.host}/geocimat/clasificacion`)
         .then(function(response) {
           // handle success
+          console.log(response.data.clasificaciones);
           self.listClassification = response.data.clasificaciones;
         })
         .catch(function(error) {
@@ -254,7 +259,7 @@ export default {
       this.idClassification = this.listClassification[index].id;
       var self = this;
       await axios
-        .post("http://localhost:8000/geocimat/clasificacion/visible", {
+        .post(`${this.host}/geocimat/clasificacion/visible`, {
           id: self.idClassification,
           visible: valor,
         })
@@ -276,7 +281,7 @@ export default {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         var self = this;
         await axios
-          .post("http://localhost:8000/geocimat/clasificacion/crear", {
+          .post(`${this.host}/geocimat/clasificacion/crear`, {
             nombre: self.nombre,
             material_color: self.formData.colorSelected,
             visible: true,
@@ -315,7 +320,7 @@ export default {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         var self = this;
         await axios
-          .post("http://localhost:8000/geocimat/clasificacion/modificar", {
+          .post(`${this.host}/geocimat/clasificacion/modificar`, {
             id: self.idClassification,
             nombre: self.nombre,
             material_color: self.formData.colorSelected,
