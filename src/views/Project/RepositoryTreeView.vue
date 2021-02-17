@@ -87,7 +87,7 @@
       v-model="tree"
       :open="initiallyOpen"
       :items="items"
-      item-key="ruta"
+      item-key="path"
       activatable
     >
       <template v-slot:prepend="{ item, open }">
@@ -127,7 +127,7 @@ export default {
     uploading: false,
     showComponent: true,
     folderName: "",
-    ruta: "",
+    path: "",
     dialog: false,
     filesUpload: [],
     initiallyOpen: ["public"],
@@ -190,24 +190,24 @@ export default {
         });
     },
 
-    downloadItem({ ruta }) {
+    downloadItem({ path }) {
       window.open(
-        window.location.origin + "/storage/app/public/" + ruta,
+        window.location.origin + "/storage/app/public/" + path,
         "_blank"
       );
       this.tree = [];
     },
 
-    uploadItemClick({ ruta }) {
+    uploadItemClick({ path }) {
       this.$refs.image.$refs.input.click();
-      this.ruta = ruta;
+      this.path = path;
     },
 
     upload() {
-      if (this.filesUpload && this.ruta) {
+      if (this.filesUpload && this.path) {
         this.uploading = true;
         const formData = this.createFormData();
-        uploadElement(formData, this.value)
+        uploadElement(formData)
           .then((result) => {
             this.showAlert({ show: true, text: result, color: "indigo" });
           })
@@ -217,7 +217,7 @@ export default {
           .then(() => {
             this.setItems();
             this.filesUpload = [];
-            this.ruta = "";
+            this.path = "";
             this.uploading = false;
           });
       }
@@ -226,7 +226,7 @@ export default {
     createFormData() {
       let formData = new FormData();
       formData.append("id", this.id_proyecto);
-      formData.append("directorio", this.ruta);
+      formData.append("directorio", this.path);
       this.filesUpload.forEach((file) => {
         formData.append("archivos[]", file);
       });

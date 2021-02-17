@@ -1,6 +1,6 @@
 const axios = require('axios');
-// const baseURL = 'https://geocimat.herokuapp.com';
-const baseURL = 'http://127.0.0.1:8000';
+const baseURL = 'https://geocimat.herokuapp.com';
+// const baseURL = 'http://127.0.0.1:8000';
 
 function getDirectory(project_id) {
   return new Promise((resolve, reject) => {
@@ -41,7 +41,7 @@ function deleteElement(project) {
   });
 }
 
-function uploadElement(formData, value) {
+function uploadElement(formData) {
   return new Promise((resolve, reject) => {
     axios
       .post(`${baseURL}/geocimat/repositorio/almacenar`, formData, {
