@@ -1,9 +1,9 @@
 <template>
   <div id="inspire" v-if="showComponent">
-    <v-row>
+    <v-row v-show="true" class="mt-2">
       <v-col col="6" lg="6">
         <v-file-input
-          v-show="false"
+          v-model="filesUpload"
           ref="image"
           class="mt-2"
           clearable
@@ -11,9 +11,16 @@
           multiple
           show-size
           truncate-length="15"
-          v-model="filesUpload"
+          @change="upload"
         >
         </v-file-input>
+      </v-col>
+      <v-col v-if="uploading">
+        <v-progress-circular
+          :width="3"
+          color="indigo"
+          indeterminate
+        ></v-progress-circular>
       </v-col>
     </v-row>
 
@@ -93,7 +100,7 @@
       </template>
 
       <template v-slot:append="{ item }">
-        <v-icon @click="uploadItem(item)" v-if="item.mime === 'folder'">
+        <v-icon @click="uploadItemClick(item)" v-if="item.mime === 'folder'">
           mdi-upload
         </v-icon>
         <v-icon @click="downloadItem(item)" v-else color="indigo">
@@ -109,6 +116,7 @@ import {
   getDirectory,
   createFolder,
   deleteElement,
+  uploadElement,
 } from "../../lib/treeViewApi";
 
 export default {
@@ -116,8 +124,10 @@ export default {
   props: { showAlert: Function },
   data: () => ({
     id_proyecto: "",
+    uploading: false,
     showComponent: true,
     folderName: "",
+    ruta: "",
     dialog: false,
     filesUpload: [],
     initiallyOpen: ["public"],
@@ -155,7 +165,6 @@ export default {
         .then((result) => {
           this.items = result.directorio;
           this.showComponent = true;
-          console.log(result);
         })
         .catch((error) => {
           this.items = [];
@@ -189,13 +198,39 @@ export default {
       this.tree = [];
     },
 
-    uploadItem(item) {
+    uploadItemClick({ ruta }) {
       this.$refs.image.$refs.input.click();
-      if (this.filesUpload) {
-        console.log(item);
-        return;
+      this.ruta = ruta;
+    },
+
+    upload() {
+      if (this.filesUpload && this.ruta) {
+        this.uploading = true;
+        const formData = this.createFormData();
+        uploadElement(formData, this.value)
+          .then((result) => {
+            this.showAlert({ show: true, text: result, color: "indigo" });
+          })
+          .catch((error) => {
+            this.showAlert({ show: true, text: error, color: "error" });
+          })
+          .then(() => {
+            this.setItems();
+            this.filesUpload = [];
+            this.ruta = "";
+            this.uploading = false;
+          });
       }
-      console.log("no debe subir");
+    },
+
+    createFormData() {
+      let formData = new FormData();
+      formData.append("id", this.id_proyecto);
+      formData.append("directorio", this.ruta);
+      this.filesUpload.forEach((file) => {
+        formData.append("archivos[]", file);
+      });
+      return formData;
     },
 
     createFolder() {

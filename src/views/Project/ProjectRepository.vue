@@ -279,7 +279,6 @@ export default {
     },
 
     showAlert(data) {
-      console.log("hi");
       this.snackbar = { ...data };
     },
 
