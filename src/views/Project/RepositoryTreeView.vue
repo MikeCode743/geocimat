@@ -1,7 +1,7 @@
 <template>
   <div id="inspire" v-if="showComponent">
-    <v-row v-show="true" class="mt-2">
-      <v-col col="6" lg="6">
+    <v-row class="mt-2">
+      <v-col col="6" lg="6" v-show="false">
         <v-file-input
           v-model="filesUpload"
           ref="image"
@@ -87,7 +87,7 @@
       v-model="tree"
       :open="initiallyOpen"
       :items="items"
-      item-key="id"
+      item-key="ruta"
       activatable
     >
       <template v-slot:prepend="{ item, open }">
@@ -121,11 +121,16 @@ import {
 
 export default {
   name: "RepositoryTreeView",
-  props: { showAlert: Function },
+
+  props: {
+    showAlert: Function,
+    setGalery: Function,
+  },
+
   data: () => ({
     id_proyecto: "",
     uploading: false,
-    showComponent: true,
+    showComponent: false,
     folderName: "",
     path: "",
     dialog: false,
@@ -164,6 +169,7 @@ export default {
       getDirectory(this.id_proyecto)
         .then((result) => {
           this.items = result.directorio;
+          this.setGalery(result.galeria);
           this.showComponent = true;
         })
         .catch((error) => {
@@ -190,17 +196,14 @@ export default {
         });
     },
 
-    downloadItem({ path }) {
-      window.open(
-        window.location.origin + "/storage/app/public/" + path,
-        "_blank"
-      );
+    downloadItem({ ruta }) {
+      window.open(window.location.origin + "/storage/" + ruta, "_blank");
       this.tree = [];
     },
 
-    uploadItemClick({ path }) {
+    uploadItemClick({ ruta }) {
       this.$refs.image.$refs.input.click();
-      this.path = path;
+      this.path = ruta;
     },
 
     upload() {

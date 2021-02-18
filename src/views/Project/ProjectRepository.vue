@@ -10,64 +10,18 @@
     </v-row>
     <v-toolbar>
       <v-tabs dark background-color="primary" grow v-model="tab">
-        <v-tab>
-          <v-badge v-if="numberOfFiles === 0" color="pink" dot>
-            Mis Archivos
-          </v-badge>
-          <v-badge v-else color="pink" :content="numberOfFiles">
-            Mis Archivos
-          </v-badge>
-        </v-tab>
-        <v-tab>
-          <v-badge v-if="listImages.length === 0" color="pink" dot>
-            Galería
-          </v-badge>
-          <v-badge v-else color="pink" :content="listImages.length">
-            Galería
-          </v-badge>
-        </v-tab>
-        <v-tab>Información</v-tab>
         <v-tab>Repositorio</v-tab>
+        <v-tab>Galería</v-tab>
+        <v-tab>Información</v-tab>
       </v-tabs>
     </v-toolbar>
 
-    <v-card class="mt-2" v-if="tab === 0">
-      <v-data-table
-        :headers="headers"
-        :items="fileList"
-        class="elevation-1"
-        :search="search"
-      >
-        <template v-slot:top>
-          <v-toolbar flat>
-            <v-text-field
-              v-model="search"
-              label="Buscar archivo"
-              class="mx-4 mt-8"
-              prepend-inner-icon="mdi-magnify"
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-file-input
-              class="mt-8"
-              clearable
-              counter
-              multiple
-              show-size
-              truncate-length="15"
-              v-model="files"
-              @change="fileUpload"
-            >
-            </v-file-input>
-          </v-toolbar>
-        </template>
-        <template v-slot:[`item.delete`]="{ item }">
-          <v-icon @click="deleteItem(item)"> mdi-delete </v-icon>
-        </template>
-        <template v-slot:[`item.download`]="{ item }">
-          <v-icon @click="downloadFile(item)"> mdi-download</v-icon>
-        </template>
-      </v-data-table>
-    </v-card>
+    <v-col v-if="tab === 0">
+      <RepositoryTreeView
+        v-bind:showAlert="showAlert"
+        v-bind:setGalery="setGalery"
+      />
+    </v-col>
 
     <v-card class="pa-2 mt-2" v-if="tab === 1">
       <v-btn-toggle>
@@ -80,7 +34,7 @@
       </v-btn-toggle>
       <v-row class="mt-1">
         <v-col
-          v-for="picture in listImages"
+          v-for="picture in galeryList"
           :key="picture.id"
           class="d-flex child-flex"
           :cols="sizeColsLimit"
@@ -91,7 +45,7 @@
             aspect-ratio="1"
             class="grey lighten-2"
             alt="picture.name"
-            @click="downloadFile(picture)"
+            @click="openImage(picture)"
             :style="{ cursor: 'pointer' }"
           >
             <template v-slot:placeholder>
@@ -133,30 +87,6 @@
       <v-card-title>Descripción</v-card-title>
     </v-card>
 
-    <v-row class="mx-auto" v-if="tab === 3">
-      <v-col>
-        <RepositoryTreeView v-bind:showAlert="showAlert" />
-      </v-col>
-    </v-row>
-
-    <v-dialog v-model="dialogDelete" max-width="500px">
-      <v-card>
-        <v-card-title class="headline">
-          {{ deleteFileText }}
-        </v-card-title>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="deleteItemConfirm">
-            Aceptar
-          </v-btn>
-          <v-btn color="blue darken-1" text @click="dialogDelete = false">
-            Cancelar
-          </v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <v-snackbar
       v-model="snackbar.show"
       :timeout="4000"
@@ -192,46 +122,16 @@ export default {
 
   data() {
     return {
-      files: [],
       snackbar: {
         show: false,
         text: "",
         color: "",
       },
       idProject: "",
-      tab: 3,
-      sizeCols: 4,
-      currentFile: {},
-      dialogDelete: false,
-      deleteFileText: "",
-      search: "",
-      headers: [
-        {
-          text: "Nombre del archivo",
-          align: "start",
-          sortable: false,
-          value: "name",
-        },
-        {
-          text: "Agregado",
-          value: "fecha",
-          sortable: false,
-          align: "start",
-        },
-        {
-          text: "Eliminar",
-          value: "delete",
-          sortable: false,
-          align: "start",
-        },
-        {
-          text: "Descargar",
-          value: "download",
-          sortable: false,
-          align: "start",
-        },
-      ],
-      fileList: [],
+      tab: 0,
+      sizeCols: 2,
+      galeryList: [],
+
       dataProject: {
         url:
           "https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/static/-89.229461,14.187164,13.58,0/500x500?access_token=pk.eyJ1Ijoia2VybmVsNTAzIiwiYSI6ImNrZHA5cmhiYTIwamgyeXBkOTgyZmU1cmkifQ.bK_Wbz4134Uf33qBDGklKg",
@@ -240,27 +140,15 @@ export default {
   },
 
   computed: {
-    numberOfFiles() {
-      return this.fileList.length;
-    },
-
-    listImages() {
-      return this.fileList.filter(({ url }) =>
-        url.match(/.jpg|.gif|.jpeg|.png$/g)
-      );
-    },
-
     sizeColsLimit() {
       if (this.sizeCols <= 1) {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.sizeCols = 1;
       }
-
       if (this.sizeCols >= 12) {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.sizeCols = 12;
       }
-
       return this.sizeCols;
     },
 
@@ -269,81 +157,19 @@ export default {
     },
   },
 
-  created() {
-    this.loadData();
-  },
+  created() {},
 
   methods: {
-    loadData() {
-      fetchFiles().then((files) => (this.fileList = files));
-    },
-
     showAlert(data) {
       this.snackbar = { ...data };
     },
 
-    fileUpload() {
-      if (this.files.length) {
-        let formData = new FormData();
-        for (let file of this.files) {
-          formData.append("uploadFile", file, file.name);
-        }
-        fetch("https://aldebaran-wallet.herokuapp.com/aldebaran/bucket", {
-          method: "POST",
-          body: formData,
-        }).then((response) => {
-          if (response.ok) {
-            this.snackbar = {
-              show: true,
-              text: `Se ha subido ${this.files.length} elemento.`,
-              color: "",
-            };
-            fetchFiles().then((files) => (this.fileList = files));
-          } else {
-            this.snackbar = {
-              visible: true,
-              text: "Ocurrio un error inesperado!",
-              color: "red darken-1",
-            };
-          }
-          this.files = [];
-        });
-      }
+    setGalery(list) {
+      this.galeryList = [...list];
     },
 
-    downloadFile(i) {
-      window.open(i.url, "_blank");
-    },
-
-    deleteItem(i) {
-      this.dialogDelete = true;
-      this.deleteFileText = `¿Desea eliminar el archivo ${i.name}?`;
-      this.currentFile = i;
-    },
-
-    deleteItemConfirm() {
-      console.log("se eliminó", this.currentFile);
-      fetch("https://aldebaran-wallet.herokuapp.com/aldebaran/bucket", {
-        method: "DELETE",
-        headers: { deletefile: this.currentFile.name },
-      }).then((response) => {
-        if (response.ok) {
-          this.snackbar = {
-            show: true,
-            text: "Elemento eliminado.",
-            color: "",
-          };
-          fetchFiles().then((files) => (this.fileList = files));
-        } else {
-          this.snackbar = {
-            show: true,
-            text: "Ocurrio un error inesperado!",
-            color: "red darken-1",
-          };
-        }
-        this.files = [];
-      });
-      this.dialogDelete = false;
+    openImage({ url }) {
+      window.open(url, "_blank");
     },
   },
 };
