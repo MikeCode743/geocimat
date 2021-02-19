@@ -219,7 +219,7 @@ export default {
       on: true,
       attrs: {},
 
-      host:"https://geocimat.herokuapp.com",
+      host: "https://geocimat.herokuapp.com",
       // host:"http://localhost:8000"
       // host: location.host
     };
@@ -231,7 +231,7 @@ export default {
     async getState() {
       var self = this;
       axios
-        .get(`${this.host}/geocimat/estadovisita/`)
+        .get(`${this.host}/geocimat/estadovisita`)
         .then(function(response) {
           // handle success
           console.log(response.data);
@@ -310,7 +310,6 @@ export default {
     async editState() {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         var self = this;
-        let update = false;
         await axios
           .post(`${this.host}/geocimat/estadovisita/modificar`, {
             id: self.idState,
@@ -319,7 +318,9 @@ export default {
           })
           .then(function(response) {
             self.showSnackbar(response.data.message, "primary");
-            update = true;
+            self.listState[self.indexState].nombre = self.nombre;
+            self.listState[self.indexState].material_color =
+              self.formData.colorSelected;
           })
           .catch(function(error) {
             // handle error
@@ -328,12 +329,8 @@ export default {
           })
           .then(function() {
             // always executed
-            if (update = true) {
-              self.listState[self.indexState].nombre = self.nombre;
-              self.listState[self.indexState].material_color =
-                self.formData.colorSelected;
-            }
           });
+        
 
         this.settingdata();
       }
