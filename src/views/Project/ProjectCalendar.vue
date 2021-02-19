@@ -252,7 +252,6 @@ export default {
   components: {},
 
   created() {
-    this.mes = "febrero 2021";
     this.getDates();
   },
   mounted() {},
@@ -339,8 +338,8 @@ export default {
 
     async getDates() {
       var self = this;
-      await axios
-        .get(`${this.host}/geocimat/calendario/`)
+      axios
+        .get(`${this.host}/geocimat/calendario`)
         .then(function(response) {
           self.scheduledVisits = response.data.calendario;
           self.visitStatuses = response.data.estadoVisita;

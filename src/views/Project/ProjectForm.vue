@@ -293,7 +293,7 @@ export default {
     async getClassification() {
       var self = this;
       axios
-        .get(`${this.host}/geocimat/clasificacion/`)
+        .get(`${this.host}/geocimat/clasificacion`)
         .then(function(response) {
           // handle success
           console.log(response.data.clasificaciones);
