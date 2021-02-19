@@ -196,8 +196,8 @@ export default {
         });
     },
 
-    downloadItem({ ruta }) {
-      window.open(window.location.origin + "/storage/" + ruta, "_blank");
+    downloadItem({ url }) {
+      window.open(url, "_blank");
       this.tree = [];
     },
 

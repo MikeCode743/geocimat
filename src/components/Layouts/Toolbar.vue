@@ -100,7 +100,6 @@
 </template>
 
 <script>
-import axios from "axios";
 export default {
   name: "Toolbar",
   data() {
@@ -113,34 +112,23 @@ export default {
       ],
       drawer: false,
       admin: false,
-      /* Tooltip */
       on: true,
       attrs: {},
-
-      // host: location.host,
-      // host: "http://localhost:8000",
-      host: "https://geocimat.herokuapp.com",
     };
   },
   created() {
     this.getProjects();
   },
   methods: {
-    async getProjects() {
-      // var self = this;
-      // await axios
-      //   .get(`${this.host}/geocimat/proyecto`)
-      //   .then(function(response) {
-      //     self.listOfProjects = response.data.proyecto;
-      //   })
-      //   .catch(function (error) {
-      //     // handle error
-      //     console.log(error);
-      //   })
-      //   .then(function () {
-      //     // always executed
-      //   });
-      // console.log(this.getProjects);
+    getProjects() {
+      axios
+        .get(`/geocimat/proyecto`)
+        .then((response) => {
+          this.listOfProjects = response.data.proyecto;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
   },
 };
