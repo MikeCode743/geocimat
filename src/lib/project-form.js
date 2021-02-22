@@ -18,7 +18,7 @@ function createProject(formData) {
     axios
       .post(`${baseURL}/geocimat/proyecto/crear`, formData, config)
       .then((response) => {
-        resolve(response);
+        resolve(response.data.mensaje);
       })
       .catch((error) => {
         reject(error);

@@ -1,4 +1,4 @@
-import { baseURL, axios } from './base';
+import { baseURL, axios, config } from './base';
 
 function getDirectory(project_id) {
   return new Promise((resolve, reject) => {
@@ -40,13 +40,15 @@ function deleteElement(project) {
 }
 
 function uploadElement(formData) {
+  const configParams = {
+    ...config,
+    headers: {
+      'content-type': 'multipart/form-data',
+    },
+  };
   return new Promise((resolve, reject) => {
     axios
-      .post(`${baseURL}/geocimat/repositorio/almacenar`, formData, {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      })
+      .post(`${baseURL}/geocimat/repositorio/almacenar`, formData, configParams)
       .then((response) => {
         resolve(response.data.mensaje);
       })

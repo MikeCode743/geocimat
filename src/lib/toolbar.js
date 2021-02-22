@@ -5,7 +5,7 @@ function getInfoUser(id) {
     axios
       .get(`${baseURL}/geocimat/proyecto`, id)
       .then((result) => {
-        resolve(result);
+        resolve(result.data);
       })
       .catch((err) => {
         reject(err);

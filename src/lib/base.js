@@ -2,8 +2,8 @@
 // document.querySelector('[name="_token"]')?.value;
 const axios = require('axios');
 const config = { 'X-CSRF-TOKEN': window.Laravel.token, otro: 'header' };
-// const baseURL = 'http://127.0.0.1:8000';
 const baseURL = '';
+// const baseURL = 'http://127.0.0.1:8000';
 // const baseURL = 'https://geocimat.herokuapp.com';
 
 export { axios, baseURL, config };

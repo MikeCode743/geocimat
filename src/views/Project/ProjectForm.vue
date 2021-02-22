@@ -267,8 +267,8 @@ export default {
             this.places = res.features;
           })
           .catch((err) => {
-            this.places = [];
             console.log(err);
+            this.places = [];
           })
           .finally(() => (this.isLoading = false));
       } else {
@@ -301,33 +301,22 @@ export default {
       }
 
       createProject(this.getFormData())
-        .then((result) => {
-          console.log(result);
+        .then((mensaje) => {
+          this.snackbar = {
+            visible: true,
+            text: mensaje,
+            color: "indigo",
+          };
+          this.cleanForm();
         })
         .catch((err) => {
+          this.snackbar = {
+            visible: true,
+            text: "Error inesperado.",
+            color: "red",
+          };
           console.log(err);
         });
-
-      // var self = this;
-      // await axios
-      //   .post(`${this.host}/geocimat/proyecto/crear`)
-      //   .then(function (response) {
-      //     console.log(response);
-      //     self.cleanForm();
-      //     self.snackbar = {
-      //       visible: true,
-      //       text: response.data.message,
-      //       color: "blue",
-      //     };
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error);
-      //     self.cleanForm();
-      //     self.snackbar = {
-      //       visible: true,
-      //       text: response.data.message,
-      //     };
-      //   });
     },
 
     getFormData() {

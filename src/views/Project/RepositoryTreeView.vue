@@ -1,5 +1,5 @@
 <template>
-  <div id="inspire" v-if="showComponent">
+  <div id="inspire">
     <v-row class="mt-2">
       <v-col col="6" lg="6" v-show="false">
         <v-file-input
@@ -125,12 +125,13 @@ export default {
   props: {
     showAlert: Function,
     setGalery: Function,
+    displayComponent: Function,
+    setProjectInfo: Function,
   },
 
   data: () => ({
     id_proyecto: "",
     uploading: false,
-    showComponent: false,
     folderName: "",
     path: "",
     dialog: false,
@@ -142,10 +143,6 @@ export default {
       "image/jpeg": "mdi-file-image",
       "image/png": "mdi-file-image",
       "application/javascript": "mdi-language-javascript",
-      json: "mdi-code-json",
-      md: "mdi-language-markdown",
-      txt: "mdi-file-document-outline",
-      xls: "mdi-file-excel",
     },
     tree: [],
     items: [],
@@ -158,9 +155,9 @@ export default {
 
   watch: {
     $route(to, from) {
-      // console.log(to.params.id, from.params.id);
       this.id_proyecto = to.params.id;
       this.setItems();
+      this.displayComponent(false);
     },
   },
 
@@ -170,12 +167,13 @@ export default {
         .then((result) => {
           this.items = result.directorio;
           this.setGalery(result.galeria);
-          this.showComponent = true;
+          this.setProjectInfo(result.datos);
+          this.displayComponent(true);
         })
         .catch((error) => {
           this.items = [];
           this.showAlert({ show: true, text: error, color: "red" });
-          this.showComponent = false;
+          this.displayComponent(false);
         });
     },
 
