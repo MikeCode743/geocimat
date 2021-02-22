@@ -104,18 +104,9 @@
 </template>
 
 <script>
-import RepositoryTreeView from "@/views/Project/RepositoryTreeView";
+import RepositoryTreeView from "@/views/project/RepositoryTreeView";
 
-async function fetchFiles() {
-  const response = await fetch(
-    "https://aldebaran-wallet.herokuapp.com/aldebaran/bucket"
-  );
-  const files = await response.json();
-  return files;
-}
 export default {
-  name: "TestContainer",
-
   components: {
     RepositoryTreeView,
   },
@@ -127,6 +118,7 @@ export default {
         text: "",
         color: "",
       },
+
       idProject: "",
       tab: 0,
       sizeCols: 2,

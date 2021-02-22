@@ -143,8 +143,7 @@
 import "../../assets/mapbox-gl.css";
 import Mapbox from "mapbox-gl";
 import { MglMap, MglMarker, MglNavigationControl } from "vue-mapbox";
-
-import axios from "axios";
+import { getClassification, createProject } from "@/lib/project-form";
 
 const defaultForm = Object.freeze({
   projectName: "",
@@ -164,7 +163,7 @@ export default {
   },
 
   created() {
-    this.getClassification();
+    this.setClassification();
     this.mapbox = Mapbox;
   },
 
@@ -186,13 +185,6 @@ export default {
       coordinatePopUp: [0, 0],
       mapEvent: null,
 
-      items: [
-        { value: "Programming", id: 1 },
-        { value: "Design", id: 2 },
-        { value: "Vue", id: 3 },
-        { value: "Vuetify", id: 4 },
-      ],
-
       clasifications: [],
 
       snackbar: {
@@ -201,12 +193,9 @@ export default {
         color: "",
       },
 
-      validForm: true,
+      validForm: false,
 
       form: { ...defaultForm },
-
-      // host: location.host,
-      host: "https://geocimat.herokuapp.com",
 
       rules: {
         requiredInputField: [
@@ -275,7 +264,6 @@ export default {
         fetch(new URL(urlBase))
           .then((res) => res.clone().json())
           .then((res) => {
-            console.log(res.features);
             this.places = res.features;
           })
           .catch((err) => {
@@ -290,33 +278,20 @@ export default {
   },
 
   methods: {
-    async getClassification() {
-      var self = this;
-      axios
-        .get(`${this.host}/geocimat/clasificacion`)
-        .then(function(response) {
-          // handle success
-          console.log(response.data.clasificaciones);
-          self.clasifications = response.data.clasificaciones;
+    setClassification() {
+      getClassification()
+        .then((result) => {
+          this.clasifications = result;
         })
-        .catch(function(error) {
-          // handle error
-          console.log(error);
-        })
-        .then(function() {
-          // always executed
+        .catch((err) => {
+          console.log(err);
+          this.clasifications = [];
         });
     },
 
-    cleanForm() {
-      this.$refs.form.resetValidation();
-      this.form = { ...defaultForm };
-      this.showMarker = false;
-    },
-
     async submitForm() {
-      const validForm = this.$refs.form.validate();
-      if (!validForm) {
+      this.validForm = this.$refs.form.validate();
+      if (!this.validForm) {
         this.snackbar = {
           visible: true,
           text: "Debe completar el formulario.",
@@ -324,33 +299,60 @@ export default {
         };
         return;
       }
-      console.log(this.form);
-      var self = this;
-      await axios
-        .post(`${this.host}/geocimat/proyecto/crear`, {
-          nombre: self.form.projectName,
-          id_clasificacion: self.form.clasification,
-          longitud: self.form.longitude,
-          latitud: self.form.latitude,
-          descripcion: self.form.description,
+
+      createProject(this.getFormData())
+        .then((result) => {
+          console.log(result);
         })
-        .then(function(response) {
-          console.log(response);
-          self.cleanForm();
-          self.snackbar = {
-            visible: true,
-            text: response.data.message,
-            color: "blue",
-          };
-        })
-        .catch(function(error) {
-          console.log(error);
-          self.cleanForm();
-          self.snackbar = {
-            visible: true,
-            text: response.data.message,
-          };
+        .catch((err) => {
+          console.log(err);
         });
+
+      // var self = this;
+      // await axios
+      //   .post(`${this.host}/geocimat/proyecto/crear`)
+      //   .then(function (response) {
+      //     console.log(response);
+      //     self.cleanForm();
+      //     self.snackbar = {
+      //       visible: true,
+      //       text: response.data.message,
+      //       color: "blue",
+      //     };
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //     self.cleanForm();
+      //     self.snackbar = {
+      //       visible: true,
+      //       text: response.data.message,
+      //     };
+      //   });
+    },
+
+    getFormData() {
+      const {
+        projectName: nombre,
+        clasification: id_clasificacion,
+        longitude: longitud,
+        latitude: latitud,
+        description: descripcion,
+      } = this.form;
+
+      const formData = {
+        nombre,
+        id_clasificacion,
+        longitud,
+        latitud,
+        descripcion,
+      };
+      return formData;
+    },
+
+    cleanForm() {
+      this.$refs.form.resetValidation();
+      this.form = { ...defaultForm };
+      this.showMarker = false;
     },
 
     onMapLoaded(e) {

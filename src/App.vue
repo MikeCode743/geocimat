@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import ToolbarComponent from "./components/Layouts/Toolbar";
+import ToolbarComponent from "./components/Toolbar";
 
 export default {
   name: "App",
