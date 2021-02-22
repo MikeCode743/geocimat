@@ -31,9 +31,7 @@
     <v-sheet height="1000">
       <v-toolbar flat>
         <v-btn fab text small color="grey darken-2" @click="prev">
-          <v-icon small>
-            mdi-chevron-left
-          </v-icon>
+          <v-icon small> mdi-chevron-left </v-icon>
         </v-btn>
         <v-spacer></v-spacer>
         <v-toolbar-title v-if="$refs.calendar">
@@ -45,9 +43,7 @@
         <v-spacer></v-spacer>
 
         <v-btn fab text small color="grey darken-2" @click="next">
-          <v-icon small>
-            mdi-chevron-right
-          </v-icon>
+          <v-icon small> mdi-chevron-right </v-icon>
         </v-btn>
       </v-toolbar>
       <v-calendar
@@ -86,9 +82,7 @@
             <v-btn text color="secondary" @click="show = false">
               Cancelar
             </v-btn>
-            <v-btn text color="green" @click="showEdit">
-              Editar
-            </v-btn>
+            <v-btn text color="green" @click="showEdit"> Editar </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -206,9 +200,7 @@
     <!-- START MODAL DELETE -->
     <v-dialog v-model="dialogDelete" max-width="450">
       <v-card>
-        <v-card-title class="headline">
-          Eliminar Visita
-        </v-card-title>
+        <v-card-title class="headline"> Eliminar Visita </v-card-title>
 
         <v-card-text>
           ¿Seguro de eliminar la visita a {{ visitInfo.project }}?
@@ -220,9 +212,7 @@
           <v-btn color="red darken-1" text @click="deleteVisit()">
             Eliminar
           </v-btn>
-          <v-btn text @click="dialogDelete = false">
-            Cancelar
-          </v-btn>
+          <v-btn text @click="dialogDelete = false"> Cancelar </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -244,8 +234,6 @@
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
   name: "ProjectCalendar",
 
@@ -311,8 +299,8 @@ export default {
 
       // host: location.host,
       // host: "http://localhost:8000",
-      host:"https://geocimat.herokuapp.com",
-
+      // host: "https://geocimat.herokuapp.com",
+      host: "http://localhost:8000",
     };
   },
 
@@ -336,52 +324,39 @@ export default {
       this.dialog = true;
     },
 
-    async getDates() {
-      var self = this;
-      axios
+    getDates() {
+      this.axios
         .get(`${this.host}/geocimat/calendario`)
-        .then(function(response) {
-          self.scheduledVisits = response.data.calendario;
-          self.visitStatuses = response.data.estadoVisita;
-          self.projects = response.data.proyectos;
+        .then((response) => {
+          this.scheduledVisits = response.data.calendario;
+          this.visitStatuses = response.data.estadoVisita;
+          this.projects = response.data.proyectos;
         })
-        .catch(function(error) {
-          // handle error
+        .catch(function (error) {
           console.log(error);
-        })
-        .then(function() {
-          // always executed
         });
     },
 
-    async assignDate() {
-      //Esto cambiará a una petición solo quedará el objeto para guardarlo
+    assignDate() {
       let [startDate, endDate] = this.visitInfo.dates;
-
-      var self = this;
       let eventAdd = false;
       let newId = null;
-      await axios
+      this.axios
         .post(`${this.host}/geocimat/calendario/crear`, {
-          identificador: self.visitInfo.project,
-          id_estado: self.visitInfo.idStatus,
+          identificador: this.visitInfo.project,
+          id_estado: this.visitInfo.idStatus,
           fecha_inicio: startDate,
           fecha_fin: endDate || startDate,
-          descripcion: self.visitInfo.description,
+          descripcion: this.visitInfo.description,
         })
-        .then(function(response) {
-          // handle success
-          self.showSnackbar(response.data.message, "primary");
+        .then((response) => {
+          this.showSnackbar(response.data.message, "primary");
           newId = response.data.newDate;
           eventAdd = true;
         })
-        .catch(function(error) {
-          self.showSnackbar("ocurrio un error", "red");
-          // handle error
+        .catch((error) => {
+          this.showSnackbar("ocurrio un error", "red");
           console.log(error);
-        })
-        .then(function() {
-          // always executed
         });
 
       if (eventAdd) {
@@ -397,14 +372,11 @@ export default {
         });
       }
     },
+
     showProject({ event }) {
       this.visitInfo.id = event.id;
       this.visitInfo.project = event.name;
-      if (event.descripcion !== null) {
-        this.visitInfo.description = event.descripcion;
-      } else {
-        this.visitInfo.description = "¡Sin descripcion!";
-      }
+      this.visitInfo.description = event.descripcion || "¡Sin descripción!";
       this.visitInfo.idStatus = event.id_status;
       this.visitInfo.stateVisit = this.visitStatuses.find(
         (element) => element.id === event.id_status
@@ -417,22 +389,22 @@ export default {
 
       this.visitInfo.classification = event.clasificacion;
     },
-    async editVisit() {
+
+    editVisit() {
       let visit = false;
       let indexVisit = null;
-      var self = this;
-      await axios
+      this.axios
         .post(`${this.host}/geocimat/calendario/modificar`, {
-          id: self.visitInfo.id,
-          id_estado: self.visitInfo.idStatus,
-          descripcion: self.visitInfo.description,
+          id: this.visitInfo.id,
+          id_estado: this.visitInfo.idStatus,
+          descripcion: this.visitInfo.description,
         })
-        .then(function(response) {
-          self.showSnackbar(response.data.message, "primary");
+        .then(function (response) {
+          this.showSnackbar(response.data.message, "primary");
           visit = true;
         })
-        .catch(function(error) {
-          self.showSnackbar("ocurrio un error", "red");
+        .catch(function (error) {
+          this.showSnackbar("ocurrio un error", "red");
           console.log(error);
         });
 
@@ -454,42 +426,43 @@ export default {
         this.visitInfo = {};
       }
     },
-    showEdit() {
-      this.dialogEdit = true;
-      this.show = false;
-    },
-    async deleteVisit() {
-      var self = this;
+
+    deleteVisit() {
       let eventDelete = false;
-      await axios
+      this.axios
         .post(`${this.host}/geocimat/calendario/destruir`, {
-          id: self.visitInfo.id,
+          id: this.visitInfo.id,
         })
-        .then(function(response) {
-          self.showSnackbar(response.data.message, "secondary");
-          // handle success
+        .then(function (response) {
+          this.showSnackbar(response.data.message, "secondary");
           eventDelete = true;
         })
-        .catch(function(error) {
-          self.showSnackbar("ocurrio un error", "red");
-          // handle error
+        .catch(function (error) {
+          this.showSnackbar("ocurrio un error", "red");
           console.log(error);
         })
-        .then(function() {});
+        .then(function () {});
 
       if (eventDelete) {
-        self.scheduledVisits = self.scheduledVisits.filter(
-          (element) => element.id != self.visitInfo.id
+        this.scheduledVisits = this.scheduledVisits.filter(
+          (element) => element.id != this.visitInfo.id
         );
         this.show = false;
         this.dialogDelete = false;
         this.visitInfo = {};
       }
     },
+
+    showEdit() {
+      this.dialogEdit = true;
+      this.show = false;
+    },
+
     prev() {
       this.$refs.calendar.prev();
       this.mes = "";
     },
+
     next() {
       this.$refs.calendar.next();
       this.mes = "";
@@ -498,6 +471,7 @@ export default {
       this.$refs.calendar.checkChange();
       this.mes = "";
     },
+
     showSnackbar(message, color) {
       this.snackbar.message = message;
       this.snackbar.color = color;

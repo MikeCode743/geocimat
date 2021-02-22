@@ -1,6 +1,4 @@
-const axios = require('axios');
-const baseURL = 'https://geocimat.herokuapp.com';
-// const baseURL = 'http://127.0.0.1:8000';
+import { baseURL, axios } from './base';
 
 function getDirectory(project_id) {
   return new Promise((resolve, reject) => {

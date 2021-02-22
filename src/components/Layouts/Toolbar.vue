@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- NAVBAR -->
     <v-toolbar>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>GEOCIMAT</v-toolbar-title>
@@ -10,22 +9,9 @@
       </v-btn>
     </v-toolbar>
 
-    <!-- DRAWER -->
     <v-navigation-drawer app v-model="drawer" temporary Left>
-      <template v-slot:prepend>
-        <v-list-item two-line>
-          <v-list-item-content>
-            <v-list-item-title>MIKE H</v-list-item-title>
-            <v-list-item-subtitle>Mike@email.com</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
-
-      <v-divider></v-divider>
-
       <v-list>
         <v-list-item-group>
-          <!-- INICIO -->
           <v-list-item :to="{ name: 'Home' }">
             <v-list-item-icon>
               <v-icon>mdi-home</v-icon>
@@ -35,7 +21,6 @@
             </v-list-item-content>
           </v-list-item>
 
-          <!-- FORMULARIO DE PROYECTO -->
           <v-list-item :to="{ name: 'ProjectForm' }">
             <v-list-item-icon>
               <v-icon>mdi-plus</v-icon>
@@ -44,9 +29,8 @@
               <v-list-item-title>Crear Proyecto</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
-          <!-- LISTATO DE PROYECTOS -->
 
-          <v-list-group :value="false" no-action>
+          <v-list-group no-action>
             <template v-slot:activator>
               <v-list-item-content>
                 <v-list-item-title>Listado Proyectos</v-list-item-title>
@@ -75,9 +59,7 @@
             </v-list-item>
           </v-list-group>
 
-          <!-- ADMINISTRACION -->
-
-          <v-list-group :value="false" no-action>
+          <v-list-group value="false" no-action>
             <template v-slot:activator>
               <v-list-item-content>
                 <v-list-item-title>Administraci&oacute;n</v-list-item-title>
@@ -100,7 +82,7 @@
 </template>
 
 <script>
-const axios = require("axios");
+import { getInfoUser } from "@/lib/toolbar";
 export default {
   name: "Toolbar",
   data() {
@@ -118,17 +100,16 @@ export default {
     };
   },
   created() {
-    this.getProjects();
+    this.setInfoUser();
   },
   methods: {
-    getProjects() {
-      axios
-        .get(`/geocimat/proyecto`)
-        .then((response) => {
-          this.listOfProjects = response.data.proyecto;
+    setInfoUser() {
+      getInfoUser()
+        .then((result) => {
+          console.log(result);
         })
-        .catch((error) => {
-          console.log(error);
+        .catch((err) => {
+          console.log(err);
         });
     },
   },

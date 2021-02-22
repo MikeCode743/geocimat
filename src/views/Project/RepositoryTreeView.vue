@@ -117,7 +117,7 @@ import {
   createFolder,
   deleteElement,
   uploadElement,
-} from "../../lib/treeViewApi";
+} from "@/lib/tree-view";
 
 export default {
   name: "RepositoryTreeView",
