@@ -20,7 +20,9 @@
     <div id="app"></div>
     <!-- built files will be auto injected -->
     <script>
-      window.Laravel = { token: 'iLhj9D9rZaufXt1qWK5EtqNsXhTOB6o7ysktZz1n' };
+      window.Laravel = {
+        token: document.querySelector('[name="_token"]')?.value || 'iLhj9D9rZaufXt1qWK5EtqNsXhTOB6o7ysktZz1n',
+      };
     </script>
   </body>
 </html>
