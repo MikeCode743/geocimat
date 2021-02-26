@@ -186,7 +186,12 @@
 
 <script>
 import MaterialColorPicker from "@/components/MaterialColorPicker";
-import axios from "axios";
+import {
+  index,
+  storeClassification,
+  updateClassification,
+  destroyClassification,
+} from "@/lib/admin-classification";
 
 export default {
   name: "Classification",
@@ -220,12 +225,6 @@ export default {
       /* Tooltip */
       on: true,
       attrs: {},
-
-      location: location.host,
-
-      // host: location.host,
-      host:"https://geocimat.herokuapp.com",
-      // host: "http://localhost:8000",
     };
   },
   created() {
@@ -233,21 +232,14 @@ export default {
   },
 
   methods: {
-    async getClassification() {
-      var self = this;
-      axios
-        .get(`${this.host}/geocimat/clasificacion`)
-        .then(function(response) {
-          // handle success
-          console.log(response.data.clasificaciones);
-          self.listClassification = response.data.clasificaciones;
+    getClassification() {
+      index()
+        .then((result) => {
+          this.listClassification = result;
         })
-        .catch(function(error) {
-          // handle error
-          console.log(error);
-        })
-        .then(function() {
-          // always executed
+        .catch((err) => {
+          console.log(err);
+          this.listClassification = [];
         });
     },
 
@@ -255,59 +247,56 @@ export default {
       this.settingdata();
       this.dialog = true;
     },
-    async changeState(valor, index) {
+
+    changeState(valor, index) {
       this.idClassification = this.listClassification[index].id;
-      var self = this;
-      await axios
-        .post(`${this.host}/geocimat/clasificacion/visible`, {
-          id: self.idClassification,
-          visible: valor,
+      let formData = {
+        id: this.idClassification,
+        visible: valor,
+      };
+      destroyClassification(formData)
+        .then((result) => {
+          this.showSnackbar(result.message, "success");
         })
-        .then(function(response) {
-          self.showSnackbar(response.data.message, "primary");
-          // handle success
-        })
-        .catch(function(error) {
-          // handle error
-          self.listClassification[index].visible = !valor;
-          console.log(error);
-          self.showSnackbar("Ocurrio un error", "red");
-        })
-        .then(function() {
-          // always executed
+        .catch((err) => {
+          this.listClassification[index].visible = !valor;
+          this.showSnackbar("ocurrio un error", "red");
+          console.log(err);
         });
     },
-    async createClassification() {
+
+    createClassification() {
       if (this.validate(this.nombre, this.formData.colorSelected)) {
-        var self = this;
-        await axios
-          .post(`${this.host}/geocimat/clasificacion/crear`, {
-            nombre: self.nombre,
-            material_color: self.formData.colorSelected,
-            visible: true,
+        
+        let formData = {
+          nombre: this.nombre,
+          material_color: this.formData.colorSelected,
+          visible: true,
+        };
+
+        storeClassification(formData)
+          .then((result) => {
+            this.showSnackbar(result.message, "primary");
+            this.pushClassification(result.clasificacion);
           })
-          .then(function(response) {
-            self.showSnackbar("Clasificación Agregado", "primary");
-            // handle success
-            self.listClassification.push({
-              id: response.data.clasificacion.id,
-              nombre: response.data.clasificacion.nombre,
-              material_color: response.data.clasificacion.material_color,
-              visible: response.data.clasificacion.visible,
-            });
-          })
-          .catch(function(error) {
-            // handle error
-            console.log(error);
-            self.showSnackbar("Ocurrio un error", "red");
-          })
-          .then(function() {
-            // always executed
+          .catch((err) => {
+            this.showSnackbar("ocurrio un error", "red");
+            console.log(err);
           });
       }
-      this.settingdata();
     },
+    pushClassification(clasificacion) {
+      this.listClassification.push({
+        id: clasificacion.id,
+        nombre: clasificacion.nombre,
+        material_color: clasificacion.material_color,
+        visible: clasificacion.visible,
+      });
+    },
+
     edit(index) {
+      this.settingdata();
+
       this.nombre = this.listClassification[index].nombre;
       this.formData.colorSelected = this.listClassification[
         index
@@ -316,31 +305,26 @@ export default {
       this.idClassification = this.listClassification[index].id;
       this.dialogEdit = true;
     },
-    async editClassification() {
-      if (this.validate(this.nombre, this.formData.colorSelected)) {
-        var self = this;
-        await axios
-          .post(`${this.host}/geocimat/clasificacion/modificar`, {
-            id: self.idClassification,
-            nombre: self.nombre,
-            material_color: self.formData.colorSelected,
-          })
-          .then(function(response) {
-            self.showSnackbar(response.data.message, "primary");
-            self.listClassification[self.indexClassification].nombre =
-              self.nombre;
-            self.listClassification[self.indexClassification].material_color =
-              self.formData.colorSelected;
 
-            // handle success
+    editClassification() {
+      if (this.validate(this.nombre, this.formData.colorSelected)) {
+        let updateData = {
+          id: this.idClassification,
+          nombre: this.nombre,
+          material_color: this.formData.colorSelected,
+        };
+
+        updateClassification(updateData)
+          .then((result) => {
+            this.showSnackbar(result.message, "primary");
+            this.listClassification[this.indexClassification].nombre =
+              this.nombre;
+            this.listClassification[this.indexClassification].material_color =
+              this.formData.colorSelected;
           })
-          .catch(function(error) {
-            // handle error
-            console.log(error);
-            self.showSnackbar("Ocurrio un error", "red");
-          })
-          .then(function() {
-            // always executed
+          .catch((err) => {
+            this.showSnackbar("ocurrio un error", "red");
+            console.log(err);
           });
       }
     },
