@@ -83,7 +83,7 @@
         <v-card-title>
           <span class="headline">Crear Estado de Visita</span>
         </v-card-title>
-        <v-form @submit.prevent="createState">
+        <v-form @submit.prevent="createState" ref="form" v-model="valid">
           <v-card-text>
             <!-- INPUT -->
             <v-text-field
@@ -91,6 +91,12 @@
               v-model="nombre"
               label="Nombre *"
               name="nombre"
+              :rules="[
+                (v) => !!v || 'El nombre es requerido',
+                (v) =>
+                  (v && v.length <= 50) ||
+                  'El nombre no debe sobrepasar los 50 caracteres',
+              ]"
               autofocus
               required
             ></v-text-field>
@@ -112,6 +118,7 @@
               color="blue darken-1"
               text
               type="submit"
+              :disabled="!valid"
               @click="dialog = false"
             >
               Guardar
@@ -128,7 +135,7 @@
         <v-card-title>
           <span class="headline">Editar Estado </span>
         </v-card-title>
-        <v-form @submit.prevent="editState">
+        <v-form @submit.prevent="editState" ref="formEdit" v-model="validEdit">
           <v-card-text>
             <!-- INPUT -->
             <v-text-field
@@ -136,6 +143,12 @@
               v-model="nombre"
               label="Nombre *"
               name="nombre"
+              :rules="[
+                (v) => !!v || 'El nombre es requerido',
+                (v) =>
+                  (v && v.length <= 50) ||
+                  'El nombre no debe sobrepasar los 50 caracteres',
+              ]"
               autofocus
               required
             ></v-text-field>
@@ -158,6 +171,8 @@
               text
               type="submit"
               @click="dialogEdit = false"
+              :disabled="!validEdit"
+
             >
               Editar
             </v-btn>
@@ -224,6 +239,8 @@ export default {
       /* Tooltip */
       on: true,
       attrs: {},
+      valid : true,
+      validEdit : true,
     };
   },
   created() {
@@ -266,6 +283,8 @@ export default {
     },
 
     createState() {
+      this.$refs.form.validate();
+
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         let storeData = {
           nombre: this.nombre,
@@ -305,6 +324,8 @@ export default {
     },
 
     editState() {
+      this.$refs.formEdit.validate();
+
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         let updateData = {
           id: this.idState,

@@ -65,9 +65,9 @@
             </v-btn>
           </v-toolbar>
           <v-card-text>
-            <v-chip class="my-3 mr-3" :color="color2" dark label>
+            <!-- <v-chip class="my-3 mr-3" :color="color2" dark label>
               {{ visitInfo.classification }}
-            </v-chip>
+            </v-chip> -->
             <v-chip class="my-3" :color="color" dark label>
               {{ visitInfo.stateVisit }}
             </v-chip>
@@ -89,7 +89,7 @@
     <!-- START MODAL CREATE -->
     <v-dialog v-model="dialog">
       <v-card>
-        <v-form @submit.prevent="assignDate">
+        <v-form @submit.prevent="assignDate" ref="form" v-model="valid">
           <v-card-title> Asignar Fecha </v-card-title>
           <v-card-text>
             <v-row>
@@ -101,12 +101,14 @@
                   :items="projects"
                   item-text="nombre"
                   item-value="identificador"
+                  :rules="[(v) => !!v || 'Selecciona un proyecto']"
                   label="Proyecto "
                 ></v-autocomplete>
 
                 <v-select
                   v-model="visitInfo.idStatus"
                   :items="visitStatuses"
+                  :rules="[(v) => !!v || 'Selecciona un estado']"
                   item-text="nombre"
                   item-value="id"
                   label="Estado de la visita"
@@ -116,23 +118,21 @@
                   v-model="visitInfo.description"
                   auto-grow
                   label="Descripcion"
+                  :counter="200"
+                  :rules="[
+                    (v) =>
+                      (v || '').length <= 200 ||
+                      'La descripcion no debe sobrepasar de los 200 caracteres',
+                  ]"
                 ></v-textarea>
               </v-col>
               <v-col>
-                <!-- <v-chip
-                  class="d-flex justify-center mb-3"
-                  :color="chip.color"
-                  label
-                  dark
-                >
-                  <v-icon left> mdi-check-circle</v-icon>
-                  {{ chip.info }}
-                </v-chip> -->
                 <v-date-picker
                   full-width
                   locale="es-sv"
                   v-model="visitInfo.dates"
                   range
+                  required
                 >
                 </v-date-picker>
               </v-col>
@@ -146,6 +146,7 @@
               text
               type="submit"
               @click="dialog = false"
+              :disabled="!valid"
             >
               Guardar
             </v-btn>
@@ -158,7 +159,7 @@
     <!-- START MODAL EDIT -->
     <v-dialog v-model="dialogEdit" max-width="650">
       <v-card>
-        <v-form @submit.prevent="editVisit">
+        <v-form @submit.prevent="editVisit" ref="formedit" v-model="validEdit">
           <v-card-title> {{ visitInfo.project }} </v-card-title>
           <v-card-text>
             <v-row>
@@ -166,6 +167,7 @@
                 <v-select
                   v-model="visitInfo.idStatus"
                   :items="visitStatuses"
+                  :rules="[(v) => !!v || 'Selecciona un estado']"
                   item-text="nombre"
                   item-value="id"
                   label="Estado de la visita"
@@ -175,6 +177,12 @@
                   v-model="visitInfo.description"
                   auto-grow
                   label="Descripcion"
+                  :counter="200"
+                  :rules="[
+                    (v) =>
+                      (v || '').length <= 200 ||
+                      'La descripcion no debe sobrepasar de los 200 caracteres',
+                  ]"
                 ></v-textarea>
               </v-col>
             </v-row>
@@ -187,6 +195,8 @@
               text
               type="submit"
               @click="dialogEdit = false"
+              :disabled="!valid"
+
             >
               Guardar
             </v-btn>
@@ -301,6 +311,10 @@ export default {
       visitStatuses: [],
 
       scheduledVisits: [],
+
+      valid: true,
+      validEdit: true,
+
     };
   },
 
@@ -340,6 +354,7 @@ export default {
     },
 
     assignDate() {
+      this.$refs.form.validate();
       createDate(this.getFormData())
         .then((result) => {
           this.showSnackbar(result.message, "primary");
@@ -395,6 +410,8 @@ export default {
     },
 
     editVisit() {
+      this.$refs.formEdit.validate();
+
       var formEdit = {
         id: this.visitInfo.id,
         id_estado: this.visitInfo.idStatus,

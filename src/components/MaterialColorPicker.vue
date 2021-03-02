@@ -1,21 +1,21 @@
 <template>
-    <v-row class="text-center">
-      <v-col cols="12">
-        <v-autocomplete
-          v-model="formData.colorSelected"
-          :items="materialColorAvailable"
-          chips
-          
-          label="Seleccionar Color"
-        >
-          <template v-slot:selection="data">
-            <v-chip :color="data.item" dark>
-              {{ data.item }}
-            </v-chip>
-          </template>
-        </v-autocomplete>
-      </v-col>
-    </v-row>
+  <v-row class="text-center">
+    <v-col cols="12">
+      <v-autocomplete
+        v-model="formData.colorSelected"
+        :items="materialColorAvailable"
+        :rules="[(v) => !!v || 'Selecciona un color']"
+        chips
+        label="Seleccionar Color"
+      >
+        <template v-slot:selection="data">
+          <v-chip :color="data.item" dark>
+            {{ data.item }}
+          </v-chip>
+        </template>
+      </v-autocomplete>
+    </v-col>
+  </v-row>
 </template>
 
 <script>

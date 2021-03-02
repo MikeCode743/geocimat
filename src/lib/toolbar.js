@@ -1,9 +1,9 @@
 import { baseURL, axios } from './base';
 
-function getInfoUser(id) {
+function getInfoUser() {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${baseURL}/geocimat/proyecto`, id)
+      .get(`${baseURL}/geocimat/proyecto`)
       .then((result) => {
         resolve(result.data);
       })

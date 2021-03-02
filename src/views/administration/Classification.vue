@@ -84,7 +84,7 @@
         <v-card-title>
           <span class="headline">Crear Clasificacion</span>
         </v-card-title>
-        <v-form @submit.prevent="createClassification">
+        <v-form @submit.prevent="createClassification" ref="form" v-model="valid">
           <v-card-text>
             <!-- INPUT -->
             <v-text-field
@@ -94,6 +94,13 @@
               name="nombre"
               autofocus
               required
+              :counter="50"
+              :rules="[
+                (v) => !!v || 'El nombre es requerido',
+                (v) =>
+                  (v && v.length <= 50) ||
+                  'El nombre no debe sobrepasar los 50 caracteres',
+              ]"
             ></v-text-field>
 
             <!-- COMPONENT  -->
@@ -114,6 +121,8 @@
               text
               type="submit"
               @click="dialog = false"
+              :disabled="!valid"
+
             >
               Guardar
             </v-btn>
@@ -129,7 +138,7 @@
         <v-card-title>
           <span class="headline">Editar Clasificacion</span>
         </v-card-title>
-        <v-form @submit.prevent="editClassification">
+        <v-form @submit.prevent="editClassification" ref="formEdit" v-model="validEdit">
           <v-card-text>
             <!-- INPUT -->
             <v-text-field
@@ -137,6 +146,12 @@
               v-model="nombre"
               label="Nombre *"
               name="nombre"
+              :rules="[
+                (v) => !!v || 'El nombre es requerido',
+                (v) =>
+                  (v && v.length <= 50) ||
+                  'El nombre no debe sobrepasar los 50 caracteres',
+              ]"
               autofocus
               required
             ></v-text-field>
@@ -159,6 +174,8 @@
               text
               type="submit"
               @click="dialogEdit = false"
+              :disabled="!validEdit"
+
             >
               Editar
             </v-btn>
@@ -225,6 +242,8 @@ export default {
       /* Tooltip */
       on: true,
       attrs: {},
+      valid : true,
+      validEdit : true,
     };
   },
   created() {
@@ -266,8 +285,9 @@ export default {
     },
 
     createClassification() {
+      this.$refs.form.validate();
+
       if (this.validate(this.nombre, this.formData.colorSelected)) {
-        
         let formData = {
           nombre: this.nombre,
           material_color: this.formData.colorSelected,
@@ -307,6 +327,8 @@ export default {
     },
 
     editClassification() {
+      this.$refs.formEdit.validate();
+
       if (this.validate(this.nombre, this.formData.colorSelected)) {
         let updateData = {
           id: this.idClassification,
@@ -317,10 +339,12 @@ export default {
         updateClassification(updateData)
           .then((result) => {
             this.showSnackbar(result.message, "primary");
-            this.listClassification[this.indexClassification].nombre =
-              this.nombre;
-            this.listClassification[this.indexClassification].material_color =
-              this.formData.colorSelected;
+            this.listClassification[
+              this.indexClassification
+            ].nombre = this.nombre;
+            this.listClassification[
+              this.indexClassification
+            ].material_color = this.formData.colorSelected;
           })
           .catch((err) => {
             this.showSnackbar("ocurrio un error", "red");
