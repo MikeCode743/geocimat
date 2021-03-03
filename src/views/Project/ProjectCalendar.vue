@@ -196,7 +196,6 @@
               type="submit"
               @click="dialogEdit = false"
               :disabled="!valid"
-
             >
               Guardar
             </v-btn>
@@ -314,7 +313,6 @@ export default {
 
       valid: true,
       validEdit: true,
-
     };
   },
 

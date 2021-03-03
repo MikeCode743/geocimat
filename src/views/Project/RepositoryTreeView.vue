@@ -95,7 +95,7 @@
           {{ open ? "mdi-folder-open" : "mdi-folder" }}
         </v-icon>
         <v-icon v-else>
-          {{ files[item.mime] }}
+          {{ files[item.mime] || "mdi-file" }}
         </v-icon>
       </template>
 
@@ -141,7 +141,9 @@ export default {
       "text/html": "mdi-language-html5",
       "application/pdf": "mdi-file-pdf",
       "image/jpeg": "mdi-file-image",
+      "image/jpg": "mdi-file-image",
       "image/png": "mdi-file-image",
+      "image/svg": "mdi-file-image",
       "application/javascript": "mdi-language-javascript",
     },
     tree: [],
